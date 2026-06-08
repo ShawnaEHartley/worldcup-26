@@ -6,22 +6,14 @@ const SB_BASE = 'https://raw.githubusercontent.com/statsbomb/open-data/master/da
 const COMPETITION_ID = 72   // Women's World Cup
 const SEASON_ID = 107       // 2023
 
-// Goal frame in StatsBomb pitch coords (120×80 yards)
-// Posts: y=36 (left), y=44 (right). Crossbar: z=2.44m.
-const POST_LEFT = 36
-const POST_RIGHT = 44
+// StatsBomb pitch: 120×80 yards. Goal line is the 80-yard short end.
+// Corner flags at y=0 (left) and y=80 (right).
+// Crossbar at z=2.44m.
+const PITCH_WIDTH = 80
 const CROSSBAR_H = 2.44
 
-// Near-miss threshold: how far outside the frame still earns a dot.
-// Tunable — start tight and widen if the picture looks sparse.
-// gx: left post = 0, right post = 1; gz: ground = 0, crossbar = 1.
-const NEAR_MISS_GX_MIN = -0.1
-const NEAR_MISS_GX_MAX = 1.1
-const NEAR_MISS_GZ_MIN = 0
-const NEAR_MISS_GZ_MAX = 1.1
-
 // ── Types ──────────────────────────────────────────────────────────────────
-type NormalizedOutcome = 'goal' | 'saved' | 'near_miss' | 'blocked' | 'wayward'
+type NormalizedOutcome = 'goal' | 'saved' | 'missed' | 'blocked'
 
 interface Shot {
   id: string
@@ -32,8 +24,9 @@ interface Shot {
   match_id: number
   minute: number
   outcome: NormalizedOutcome
-  reached_goalmouth: boolean
-  goalmouth: { gx: number; gz: number } | null
+  reached_goal_line: boolean
+  lineX: number | null   // 0 = left corner flag, 1 = right corner flag; null if blocked
+  height: number | null  // 0 = ground, 1 = crossbar, >1 = over bar; null if no z data or blocked
   xg: number
 }
 
@@ -69,73 +62,46 @@ async function fetchJson<T>(url: string): Promise<T> {
   return res.json() as Promise<T>
 }
 
-function toGxGz(y: number, z: number): { gx: number; gz: number } {
-  return {
-    gx: Math.round(((y - POST_LEFT) / (POST_RIGHT - POST_LEFT)) * 1000) / 1000,
-    gz: Math.round((z / CROSSBAR_H) * 1000) / 1000,
-  }
-}
-
-function isNearMiss(gx: number, gz: number): boolean {
-  return (
-    gx >= NEAR_MISS_GX_MIN &&
-    gx <= NEAR_MISS_GX_MAX &&
-    gz >= NEAR_MISS_GZ_MIN &&
-    gz <= NEAR_MISS_GZ_MAX
-  )
+function round3(n: number): number {
+  return Math.round(n * 1000) / 1000
 }
 
 // ── StatsBomb outcome → normalized outcome ─────────────────────────────────
 // Vocabulary confirmed against real 2023 WWC data:
-// Goal, Saved, Saved Off Target, Saved to Post, Post, Off T, Blocked, Wayward
-function normalizeOutcome(
+//   Goal, Saved, Saved Off Target, Saved to Post, Post, Off T, Blocked, Wayward
+//
+// New model: plot everything that reached the goal line (goal/saved/missed);
+// count blocked shots only (defender stopped it before the goal line).
+function normalizeShot(
   sbOutcome: string,
   endLocation: number[]
-): { outcome: NormalizedOutcome; reached_goalmouth: boolean; goalmouth: { gx: number; gz: number } | null } {
-  const hasZ = endLocation.length === 3
+): Pick<Shot, 'outcome' | 'reached_goal_line' | 'lineX' | 'height'> {
   const y = endLocation[1]
-  const z = hasZ ? endLocation[2] : null
+  const z = endLocation.length >= 3 ? endLocation[2] : null
+
+  const lineX = round3(y / PITCH_WIDTH)
+  const height = z !== null ? round3(z / CROSSBAR_H) : null
 
   switch (sbOutcome) {
-    case 'Goal': {
-      const goalmouth = toGxGz(y, z!)
-      return { outcome: 'goal', reached_goalmouth: true, goalmouth }
-    }
+    case 'Goal':
+      return { outcome: 'goal', reached_goal_line: true, lineX, height }
 
     case 'Saved':
     case 'Saved Off Target':
-    case 'Saved to Post': {
-      const goalmouth = hasZ ? toGxGz(y, z!) : null
-      return { outcome: 'saved', reached_goalmouth: true, goalmouth }
-    }
+    case 'Saved to Post':
+      return { outcome: 'saved', reached_goal_line: true, lineX, height }
 
-    case 'Post': {
-      // Hit the post or bar — always a near_miss with a valid position
-      const goalmouth = toGxGz(y, z!)
-      return { outcome: 'near_miss', reached_goalmouth: true, goalmouth }
-    }
-
-    case 'Off T': {
-      // Shot reached the goal plane (x=120) but missed.
-      // If it has a z coordinate, we can place it; determine near_miss vs wayward by position.
-      if (hasZ) {
-        const { gx, gz } = toGxGz(y, z!)
-        if (isNearMiss(gx, gz)) {
-          return { outcome: 'near_miss', reached_goalmouth: true, goalmouth: { gx, gz } }
-        }
-      }
-      return { outcome: 'wayward', reached_goalmouth: false, goalmouth: null }
-    }
+    case 'Post':
+    case 'Off T':
+    case 'Wayward':
+      return { outcome: 'missed', reached_goal_line: true, lineX, height }
 
     case 'Blocked':
-      return { outcome: 'blocked', reached_goalmouth: false, goalmouth: null }
-
-    case 'Wayward':
-      return { outcome: 'wayward', reached_goalmouth: false, goalmouth: null }
+      return { outcome: 'blocked', reached_goal_line: false, lineX: null, height: null }
 
     default:
-      console.warn(`Unknown outcome: ${sbOutcome} — treating as wayward`)
-      return { outcome: 'wayward', reached_goalmouth: false, goalmouth: null }
+      console.warn(`Unknown outcome "${sbOutcome}" — treating as missed`)
+      return { outcome: 'missed', reached_goal_line: true, lineX, height }
   }
 }
 
@@ -178,11 +144,10 @@ async function main() {
     process.stdout.write(`Processing match ${++processed}/${matches.length} (${match.match_id})...\r`)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const events = await fetchJson<any[]>(`${SB_BASE}/events/${match.match_id}.json`)
-    const shotEvents = events.filter((e) => e.type.name === 'Shot')
 
-    for (const e of shotEvents) {
+    for (const e of events.filter((e) => e.type.name === 'Shot')) {
       const s = e.shot
-      const { outcome, reached_goalmouth, goalmouth } = normalizeOutcome(s.outcome.name, s.end_location)
+      const { outcome, reached_goal_line, lineX, height } = normalizeShot(s.outcome.name, s.end_location)
 
       shots.push({
         id: e.id,
@@ -193,8 +158,9 @@ async function main() {
         match_id: match.match_id,
         minute: e.minute,
         outcome,
-        reached_goalmouth,
-        goalmouth,
+        reached_goal_line,
+        lineX,
+        height,
         xg: s.statsbomb_xg,
       })
     }
@@ -202,33 +168,26 @@ async function main() {
 
   console.log(`\nExtracted ${shots.length} total shots`)
 
-  // Outcome breakdown for PM review
   const breakdown: Record<string, number> = {}
-  for (const s of shots) {
-    breakdown[s.outcome] = (breakdown[s.outcome] ?? 0) + 1
-  }
+  for (const s of shots) breakdown[s.outcome] = (breakdown[s.outcome] ?? 0) + 1
   console.log('Outcome breakdown:', breakdown)
 
   // ── Write output files ─────────────────────────────────────────────────
   const outDir = join(process.cwd(), 'src/data/wwc-2023')
   mkdirSync(outDir, { recursive: true })
 
-  const meta: TournamentMeta = {
-    competition_id: COMPETITION_ID,
-    season_id: SEASON_ID,
-    name: "Women's World Cup",
-    season: '2023',
-    teams,
-    matches,
-  }
-
-  writeFileSync(join(outDir, 'meta.json'), JSON.stringify(meta, null, 2))
+  writeFileSync(
+    join(outDir, 'meta.json'),
+    JSON.stringify(
+      { competition_id: COMPETITION_ID, season_id: SEASON_ID, name: "Women's World Cup", season: '2023', teams, matches } satisfies TournamentMeta,
+      null, 2
+    )
+  )
   console.log(`Wrote src/data/wwc-2023/meta.json (${teams.length} teams, ${matches.length} matches)`)
 
   writeFileSync(join(outDir, 'shots.json'), JSON.stringify(shots, null, 2))
   console.log(`Wrote src/data/wwc-2023/shots.json (${shots.length} shots)`)
 
-  // Top-level index
   const index = [
     { id: 'wwc-2023', name: "Women's World Cup", season: '2023', competition_id: 72, season_id: 107 },
     { id: 'wc-2022', name: "Men's World Cup", season: '2022', competition_id: 43, season_id: 106 },

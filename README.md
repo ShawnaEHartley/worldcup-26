@@ -81,8 +81,9 @@ All shots for the tournament. One record per shot:
   "match_id": 3893834,
   "minute": 48,
   "outcome": "goal",
-  "reached_goalmouth": true,
-  "goalmouth": { "gx": 0.75, "gz": 0.451 },
+  "reached_goal_line": true,
+  "lineX": 0.525,
+  "height": 0.451,
   "xg": 0.706
 }
 ```
@@ -96,23 +97,25 @@ the canonical identity that enables cross-tournament player comparison (parked f
 
 | Normalized | StatsBomb source outcomes | Plotted? |
 |---|---|---|
-| `goal` | `Goal` | Yes — inside the frame |
-| `saved` | `Saved`, `Saved Off Target`, `Saved to Post` | Yes — on/near the frame |
-| `near_miss` | `Post`, `Off T` (within threshold) | Yes — just outside the frame |
+| `goal` | `Goal` | Yes |
+| `saved` | `Saved`, `Saved Off Target`, `Saved to Post` | Yes |
+| `missed` | `Post`, `Off T`, `Wayward` | Yes — positioned by how wide |
 | `blocked` | `Blocked` | No — count shown beside view |
-| `wayward` | `Wayward`, `Off T` (outside threshold) | No — count shown beside view |
 
-**`goalmouth`** — `null` when `reached_goalmouth` is false. Otherwise:
-- `gx`: horizontal position. `0` = left post, `1` = right post. `<0` or `>1` = wide of post.
-- `gz`: height. `0` = ground, `1` = crossbar. `>1` = over the bar.
+**`reached_goal_line`** — `false` only for `blocked` shots. `lineX` and `height` are
+`null` when false.
 
-Derived from StatsBomb `shot.end_location [x, y, z]` using:
-- `gx = (y - 36) / 8` (goal posts at y=36 and y=44 in StatsBomb's 120×80 pitch)
-- `gz = z / 2.44` (crossbar height = 2.44m in StatsBomb's coordinate system)
+**`lineX`** — Horizontal position along the goal line. `0` = left corner flag, `1` = right
+corner flag. The goal posts sit at approximately `0.45` (left) and `0.55` (right).
 
-**Near-miss threshold** (tunable in `scripts/build-data.ts`):
-`Off T` shots are plotted as `near_miss` if `gx ∈ [-0.1, 1.1]` and `gz ∈ [0, 1.1]`.
-Start tight; widen if the picture looks sparse once real shots render.
+Derived as `lineX = y / 80` from StatsBomb's `shot.end_location [x, y, z]`, where `y`
+is the cross-pitch coordinate on StatsBomb's 120×80-yard pitch.
+
+**`height`** — `0` = ground, `1` = crossbar, `>1` = over the bar. `null` if the shot had
+no z coordinate (some `missed` shots) or was blocked.
+
+Derived as `height = z / 2.44` (crossbar = 2.44m in StatsBomb's coordinate system).
+Not the organizing axis in the v1 wide view — retained for the parked zoom-to-goal view.
 
 ## Attribution
 
