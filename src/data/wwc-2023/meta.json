@@ -1,0 +1,778 @@
+{
+  "competition_id": 72,
+  "season_id": 107,
+  "name": "Women's World Cup",
+  "season": "2023",
+  "teams": [
+    {
+      "team_id": 1204,
+      "team_name": "Argentina Women's"
+    },
+    {
+      "team_id": 1205,
+      "team_name": "Australia Women's"
+    },
+    {
+      "team_id": 1203,
+      "team_name": "Brazil Women's"
+    },
+    {
+      "team_id": 1206,
+      "team_name": "Canada Women's"
+    },
+    {
+      "team_id": 1207,
+      "team_name": "China PR Women's"
+    },
+    {
+      "team_id": 16802,
+      "team_name": "Colombia Women's"
+    },
+    {
+      "team_id": 1832,
+      "team_name": "Costa Rica Women's"
+    },
+    {
+      "team_id": 853,
+      "team_name": "Denmark Women's"
+    },
+    {
+      "team_id": 865,
+      "team_name": "England Women's"
+    },
+    {
+      "team_id": 861,
+      "team_name": "France Women's"
+    },
+    {
+      "team_id": 857,
+      "team_name": "Germany Women's"
+    },
+    {
+      "team_id": 2355,
+      "team_name": "Haiti Women's"
+    },
+    {
+      "team_id": 855,
+      "team_name": "Italy Women's"
+    },
+    {
+      "team_id": 1212,
+      "team_name": "Jamaica Women's"
+    },
+    {
+      "team_id": 1210,
+      "team_name": "Japan Women's"
+    },
+    {
+      "team_id": 1211,
+      "team_name": "Korea Republic Women's"
+    },
+    {
+      "team_id": 2391,
+      "team_name": "Morocco Women's"
+    },
+    {
+      "team_id": 851,
+      "team_name": "Netherlands Women's"
+    },
+    {
+      "team_id": 1215,
+      "team_name": "New Zealand Women's"
+    },
+    {
+      "team_id": 1213,
+      "team_name": "Nigeria Women's"
+    },
+    {
+      "team_id": 852,
+      "team_name": "Norway Women's"
+    },
+    {
+      "team_id": 16803,
+      "team_name": "Panama Women's"
+    },
+    {
+      "team_id": 1106,
+      "team_name": "Philippines Women's"
+    },
+    {
+      "team_id": 864,
+      "team_name": "Portugal Women's"
+    },
+    {
+      "team_id": 16768,
+      "team_name": "Republic of Ireland Women's"
+    },
+    {
+      "team_id": 1216,
+      "team_name": "South Africa Women's"
+    },
+    {
+      "team_id": 863,
+      "team_name": "Spain Women's"
+    },
+    {
+      "team_id": 858,
+      "team_name": "Sweden Women's"
+    },
+    {
+      "team_id": 860,
+      "team_name": "Switzerland Women's"
+    },
+    {
+      "team_id": 1214,
+      "team_name": "United States Women's"
+    },
+    {
+      "team_id": 16769,
+      "team_name": "Vietnam Women's"
+    },
+    {
+      "team_id": 6045,
+      "team_name": "Zambia W"
+    }
+  ],
+  "matches": [
+    {
+      "match_id": 3893834,
+      "match_date": "2023-08-03",
+      "home_team_id": 2391,
+      "home_team_name": "Morocco Women's",
+      "away_team_id": 16802,
+      "away_team_name": "Colombia Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893808,
+      "match_date": "2023-07-27",
+      "home_team_id": 1214,
+      "home_team_name": "United States Women's",
+      "away_team_id": 851,
+      "away_team_name": "Netherlands Women's",
+      "home_score": 1,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893818,
+      "match_date": "2023-07-30",
+      "home_team_id": 857,
+      "home_team_name": "Germany Women's",
+      "away_team_id": 16802,
+      "away_team_name": "Colombia Women's",
+      "home_score": 1,
+      "away_score": 2
+    },
+    {
+      "match_id": 3893795,
+      "match_date": "2023-07-22",
+      "home_team_id": 853,
+      "home_team_name": "Denmark Women's",
+      "away_team_id": 1207,
+      "away_team_name": "China PR Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893825,
+      "match_date": "2023-08-01",
+      "home_team_id": 2355,
+      "home_team_name": "Haiti Women's",
+      "away_team_id": 853,
+      "away_team_name": "Denmark Women's",
+      "home_score": 0,
+      "away_score": 2
+    },
+    {
+      "match_id": 3893798,
+      "match_date": "2023-07-23",
+      "home_team_id": 861,
+      "home_team_name": "France Women's",
+      "away_team_id": 1212,
+      "away_team_name": "Jamaica Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893832,
+      "match_date": "2023-08-02",
+      "home_team_id": 1212,
+      "home_team_name": "Jamaica Women's",
+      "away_team_id": 1203,
+      "away_team_name": "Brazil Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893829,
+      "match_date": "2023-08-02",
+      "home_team_id": 16803,
+      "home_team_name": "Panama Women's",
+      "away_team_id": 861,
+      "away_team_name": "France Women's",
+      "home_score": 3,
+      "away_score": 6
+    },
+    {
+      "match_id": 3893805,
+      "match_date": "2023-07-26",
+      "home_team_id": 1210,
+      "home_team_name": "Japan Women's",
+      "away_team_id": 1832,
+      "away_team_name": "Costa Rica Women's",
+      "home_score": 2,
+      "away_score": 0
+    },
+    {
+      "match_id": 3901734,
+      "match_date": "2023-08-05",
+      "home_team_id": 1210,
+      "home_team_name": "Japan Women's",
+      "away_team_id": 852,
+      "away_team_name": "Norway Women's",
+      "home_score": 3,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893802,
+      "match_date": "2023-07-25",
+      "home_team_id": 16802,
+      "home_team_name": "Colombia Women's",
+      "away_team_id": 1211,
+      "away_team_name": "Korea Republic Women's",
+      "home_score": 2,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893799,
+      "match_date": "2023-07-24",
+      "home_team_id": 857,
+      "home_team_name": "Germany Women's",
+      "away_team_id": 2391,
+      "away_team_name": "Morocco Women's",
+      "home_score": 6,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893824,
+      "match_date": "2023-07-31",
+      "home_team_id": 16768,
+      "home_team_name": "Republic of Ireland Women's",
+      "away_team_id": 1213,
+      "away_team_name": "Nigeria Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893827,
+      "match_date": "2023-08-01",
+      "home_team_id": 16769,
+      "home_team_name": "Vietnam Women's",
+      "away_team_id": 851,
+      "away_team_name": "Netherlands Women's",
+      "home_score": 0,
+      "away_score": 7
+    },
+    {
+      "match_id": 3893819,
+      "match_date": "2023-07-30",
+      "home_team_id": 1211,
+      "home_team_name": "Korea Republic Women's",
+      "away_team_id": 2391,
+      "away_team_name": "Morocco Women's",
+      "home_score": 0,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893815,
+      "match_date": "2023-07-29",
+      "home_team_id": 861,
+      "home_team_name": "France Women's",
+      "away_team_id": 1203,
+      "away_team_name": "Brazil Women's",
+      "home_score": 2,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893800,
+      "match_date": "2023-07-24",
+      "home_team_id": 855,
+      "home_team_name": "Italy Women's",
+      "away_team_id": 1204,
+      "away_team_name": "Argentina Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893816,
+      "match_date": "2023-07-29",
+      "home_team_id": 16803,
+      "home_team_name": "Panama Women's",
+      "away_team_id": 1212,
+      "away_team_name": "Jamaica Women's",
+      "home_score": 0,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893830,
+      "match_date": "2023-08-02",
+      "home_team_id": 1204,
+      "home_team_name": "Argentina Women's",
+      "away_team_id": 858,
+      "away_team_name": "Sweden Women's",
+      "home_score": 0,
+      "away_score": 2
+    },
+    {
+      "match_id": 3893833,
+      "match_date": "2023-08-03",
+      "home_team_id": 1211,
+      "home_team_name": "Korea Republic Women's",
+      "away_team_id": 857,
+      "away_team_name": "Germany Women's",
+      "home_score": 1,
+      "away_score": 1
+    },
+    {
+      "match_id": 3901833,
+      "match_date": "2023-08-08",
+      "home_team_id": 861,
+      "home_team_name": "France Women's",
+      "away_team_id": 2391,
+      "away_team_name": "Morocco Women's",
+      "home_score": 4,
+      "away_score": 0
+    },
+    {
+      "match_id": 3901736,
+      "match_date": "2023-08-07",
+      "home_team_id": 1205,
+      "home_team_name": "Australia Women's",
+      "away_team_id": 853,
+      "away_team_name": "Denmark Women's",
+      "home_score": 2,
+      "away_score": 0
+    },
+    {
+      "match_id": 3902968,
+      "match_date": "2023-08-12",
+      "home_team_id": 1205,
+      "home_team_name": "Australia Women's",
+      "away_team_id": 861,
+      "away_team_name": "France Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893793,
+      "match_date": "2023-07-22",
+      "home_team_id": 6045,
+      "home_team_name": "Zambia W",
+      "away_team_id": 1210,
+      "away_team_name": "Japan Women's",
+      "home_score": 0,
+      "away_score": 5
+    },
+    {
+      "match_id": 3893826,
+      "match_date": "2023-08-01",
+      "home_team_id": 864,
+      "home_team_name": "Portugal Women's",
+      "away_team_id": 1214,
+      "away_team_name": "United States Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893823,
+      "match_date": "2023-07-31",
+      "home_team_id": 1832,
+      "home_team_name": "Costa Rica Women's",
+      "away_team_id": 6045,
+      "away_team_name": "Zambia W",
+      "home_score": 1,
+      "away_score": 3
+    },
+    {
+      "match_id": 3893813,
+      "match_date": "2023-07-28",
+      "home_team_id": 1207,
+      "home_team_name": "China PR Women's",
+      "away_team_id": 2355,
+      "away_team_name": "Haiti Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893790,
+      "match_date": "2023-07-21",
+      "home_team_id": 1213,
+      "home_team_name": "Nigeria Women's",
+      "away_team_id": 1206,
+      "away_team_name": "Canada Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893796,
+      "match_date": "2023-07-23",
+      "home_team_id": 858,
+      "home_team_name": "Sweden Women's",
+      "away_team_id": 1216,
+      "away_team_name": "South Africa Women's",
+      "home_score": 2,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893831,
+      "match_date": "2023-08-02",
+      "home_team_id": 1216,
+      "home_team_name": "South Africa Women's",
+      "away_team_id": 855,
+      "away_team_name": "Italy Women's",
+      "home_score": 3,
+      "away_score": 2
+    },
+    {
+      "match_id": 3906390,
+      "match_date": "2023-08-20",
+      "home_team_id": 863,
+      "home_team_name": "Spain Women's",
+      "away_team_id": 865,
+      "away_team_name": "England Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893804,
+      "match_date": "2023-07-25",
+      "home_team_id": 860,
+      "home_team_name": "Switzerland Women's",
+      "away_team_id": 852,
+      "away_team_name": "Norway Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893791,
+      "match_date": "2023-07-21",
+      "home_team_id": 863,
+      "home_team_name": "Spain Women's",
+      "away_team_id": 1832,
+      "away_team_name": "Costa Rica Women's",
+      "home_score": 3,
+      "away_score": 0
+    },
+    {
+      "match_id": 3901733,
+      "match_date": "2023-08-05",
+      "home_team_id": 860,
+      "home_team_name": "Switzerland Women's",
+      "away_team_id": 863,
+      "away_team_name": "Spain Women's",
+      "home_score": 1,
+      "away_score": 5
+    },
+    {
+      "match_id": 3893810,
+      "match_date": "2023-07-27",
+      "home_team_id": 864,
+      "home_team_name": "Portugal Women's",
+      "away_team_id": 16769,
+      "away_team_name": "Vietnam Women's",
+      "home_score": 2,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893787,
+      "match_date": "2023-07-20",
+      "home_team_id": 1215,
+      "home_team_name": "New Zealand Women's",
+      "away_team_id": 852,
+      "away_team_name": "Norway Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893820,
+      "match_date": "2023-07-30",
+      "home_team_id": 852,
+      "home_team_name": "Norway Women's",
+      "away_team_id": 1106,
+      "away_team_name": "Philippines Women's",
+      "home_score": 6,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893817,
+      "match_date": "2023-07-30",
+      "home_team_id": 860,
+      "home_team_name": "Switzerland Women's",
+      "away_team_id": 1215,
+      "away_team_name": "New Zealand Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3904629,
+      "match_date": "2023-08-16",
+      "home_team_id": 1205,
+      "home_team_name": "Australia Women's",
+      "away_team_id": 865,
+      "away_team_name": "England Women's",
+      "home_score": 1,
+      "away_score": 3
+    },
+    {
+      "match_id": 3906389,
+      "match_date": "2023-08-19",
+      "home_team_id": 858,
+      "home_team_name": "Sweden Women's",
+      "away_team_id": 1205,
+      "away_team_name": "Australia Women's",
+      "home_score": 2,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893821,
+      "match_date": "2023-07-31",
+      "home_team_id": 1206,
+      "home_team_name": "Canada Women's",
+      "away_team_id": 1205,
+      "away_team_name": "Australia Women's",
+      "home_score": 0,
+      "away_score": 4
+    },
+    {
+      "match_id": 3904628,
+      "match_date": "2023-08-15",
+      "home_team_id": 863,
+      "home_team_name": "Spain Women's",
+      "away_team_id": 858,
+      "away_team_name": "Sweden Women's",
+      "home_score": 2,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893806,
+      "match_date": "2023-07-26",
+      "home_team_id": 863,
+      "home_team_name": "Spain Women's",
+      "away_team_id": 6045,
+      "away_team_name": "Zambia W",
+      "home_score": 5,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893801,
+      "match_date": "2023-07-24",
+      "home_team_id": 1203,
+      "home_team_name": "Brazil Women's",
+      "away_team_id": 16803,
+      "away_team_name": "Panama Women's",
+      "home_score": 4,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893797,
+      "match_date": "2023-07-23",
+      "home_team_id": 851,
+      "home_team_name": "Netherlands Women's",
+      "away_team_id": 864,
+      "away_team_name": "Portugal Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893822,
+      "match_date": "2023-07-31",
+      "home_team_id": 1210,
+      "home_team_name": "Japan Women's",
+      "away_team_id": 863,
+      "away_team_name": "Spain Women's",
+      "home_score": 4,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893814,
+      "match_date": "2023-07-29",
+      "home_team_id": 858,
+      "home_team_name": "Sweden Women's",
+      "away_team_id": 855,
+      "away_team_name": "Italy Women's",
+      "home_score": 5,
+      "away_score": 0
+    },
+    {
+      "match_id": 3901832,
+      "match_date": "2023-08-08",
+      "home_team_id": 16802,
+      "home_team_name": "Colombia Women's",
+      "away_team_id": 1212,
+      "away_team_name": "Jamaica Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3902967,
+      "match_date": "2023-08-12",
+      "home_team_id": 865,
+      "home_team_name": "England Women's",
+      "away_team_id": 16802,
+      "away_team_name": "Colombia Women's",
+      "home_score": 2,
+      "away_score": 1
+    },
+    {
+      "match_id": 3901797,
+      "match_date": "2023-08-06",
+      "home_team_id": 858,
+      "home_team_name": "Sweden Women's",
+      "away_team_id": 1214,
+      "away_team_name": "United States Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3901796,
+      "match_date": "2023-08-06",
+      "home_team_id": 851,
+      "home_team_name": "Netherlands Women's",
+      "away_team_id": 1216,
+      "away_team_name": "South Africa Women's",
+      "home_score": 2,
+      "away_score": 0
+    },
+    {
+      "match_id": 3902240,
+      "match_date": "2023-08-11",
+      "home_team_id": 863,
+      "home_team_name": "Spain Women's",
+      "away_team_id": 851,
+      "away_team_name": "Netherlands Women's",
+      "home_score": 2,
+      "away_score": 1
+    },
+    {
+      "match_id": 3902239,
+      "match_date": "2023-08-11",
+      "home_team_id": 1210,
+      "home_team_name": "Japan Women's",
+      "away_team_id": 858,
+      "away_team_name": "Sweden Women's",
+      "home_score": 1,
+      "away_score": 2
+    },
+    {
+      "match_id": 3901735,
+      "match_date": "2023-08-07",
+      "home_team_id": 865,
+      "home_team_name": "England Women's",
+      "away_team_id": 1213,
+      "away_team_name": "Nigeria Women's",
+      "home_score": 0,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893811,
+      "match_date": "2023-07-28",
+      "home_team_id": 865,
+      "home_team_name": "England Women's",
+      "away_team_id": 853,
+      "away_team_name": "Denmark Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893812,
+      "match_date": "2023-07-28",
+      "home_team_id": 1204,
+      "home_team_name": "Argentina Women's",
+      "away_team_id": 1216,
+      "away_team_name": "South Africa Women's",
+      "home_score": 2,
+      "away_score": 2
+    },
+    {
+      "match_id": 3893809,
+      "match_date": "2023-07-27",
+      "home_team_id": 1205,
+      "home_team_name": "Australia Women's",
+      "away_team_id": 1213,
+      "away_team_name": "Nigeria Women's",
+      "home_score": 2,
+      "away_score": 3
+    },
+    {
+      "match_id": 3893807,
+      "match_date": "2023-07-26",
+      "home_team_id": 1206,
+      "home_team_name": "Canada Women's",
+      "away_team_id": 16768,
+      "away_team_name": "Republic of Ireland Women's",
+      "home_score": 2,
+      "away_score": 1
+    },
+    {
+      "match_id": 3893788,
+      "match_date": "2023-07-20",
+      "home_team_id": 1205,
+      "home_team_name": "Australia Women's",
+      "away_team_id": 16768,
+      "away_team_name": "Republic of Ireland Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893789,
+      "match_date": "2023-07-21",
+      "home_team_id": 1106,
+      "home_team_name": "Philippines Women's",
+      "away_team_id": 860,
+      "away_team_name": "Switzerland Women's",
+      "home_score": 0,
+      "away_score": 2
+    },
+    {
+      "match_id": 3893794,
+      "match_date": "2023-07-22",
+      "home_team_id": 865,
+      "home_team_name": "England Women's",
+      "away_team_id": 2355,
+      "away_team_name": "Haiti Women's",
+      "home_score": 1,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893792,
+      "match_date": "2023-07-22",
+      "home_team_id": 1214,
+      "home_team_name": "United States Women's",
+      "away_team_id": 16769,
+      "away_team_name": "Vietnam Women's",
+      "home_score": 3,
+      "away_score": 0
+    },
+    {
+      "match_id": 3893828,
+      "match_date": "2023-08-01",
+      "home_team_id": 1207,
+      "home_team_name": "China PR Women's",
+      "away_team_id": 865,
+      "away_team_name": "England Women's",
+      "home_score": 1,
+      "away_score": 6
+    },
+    {
+      "match_id": 3893803,
+      "match_date": "2023-07-25",
+      "home_team_id": 1215,
+      "home_team_name": "New Zealand Women's",
+      "away_team_id": 1106,
+      "away_team_name": "Philippines Women's",
+      "home_score": 0,
+      "away_score": 1
+    }
+  ]
+}

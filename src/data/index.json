@@ -1,0 +1,37 @@
+[
+  {
+    "id": "wwc-2023",
+    "name": "Women's World Cup",
+    "season": "2023",
+    "competition_id": 72,
+    "season_id": 107
+  },
+  {
+    "id": "wc-2022",
+    "name": "Men's World Cup",
+    "season": "2022",
+    "competition_id": 43,
+    "season_id": 106
+  },
+  {
+    "id": "wc-2018",
+    "name": "Men's World Cup",
+    "season": "2018",
+    "competition_id": 43,
+    "season_id": 3
+  },
+  {
+    "id": "euro-2024",
+    "name": "UEFA Euro",
+    "season": "2024",
+    "competition_id": 55,
+    "season_id": 282
+  },
+  {
+    "id": "euro-2020",
+    "name": "UEFA Euro",
+    "season": "2020",
+    "competition_id": 55,
+    "season_id": 43
+  }
+]
