@@ -29,3 +29,57 @@ body {
 .canvas-wrapper {
   width: 100%;
 }
+
+/* ── Details bar ──────────────────────────────────────────── */
+.details-bar {
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  min-height: 2.4rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.details-prompt {
+  color: #6e7681;
+}
+
+.details-active {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.details-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.details-name {
+  font-weight: 600;
+  color: #e6edf3;
+}
+
+.details-sep {
+  color: #6e7681;
+}
+
+.details-outcome {
+  color: #8b949e;
+  text-transform: capitalize;
+}
+
+.details-minute {
+  color: #8b949e;
+}
+
+.details-xg {
+  color: #8b949e;
+}
