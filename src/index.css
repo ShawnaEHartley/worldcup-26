@@ -5,4 +5,27 @@
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
+  background: #0d1117;
+  color: #e6edf3;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+}
+
+.app-header {
+  margin-bottom: 1.25rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.canvas-wrapper {
+  width: 100%;
 }
