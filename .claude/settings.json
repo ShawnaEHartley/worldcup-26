@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(xargs -I{} curl -s \"https://raw.githubusercontent.com/statsbomb/open-data/master/data/events/{}.json\")",
+      "Bash(npm run *)",
+      "Bash(git commit -m ' *)",
+      "Bash(curl -s http://localhost:5174)"
+    ]
+  }
+}

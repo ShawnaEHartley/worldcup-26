@@ -65,6 +65,16 @@ body {
 
 .canvas-wrapper {
   width: 100%;
+  min-height: 120px;
+}
+
+.canvas-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  color: #6e7681;
+  font-size: 0.875rem;
 }
 
 /* ── Details bar ──────────────────────────────────────────── */

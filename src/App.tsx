@@ -1,22 +1,32 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { GoalLineCanvas } from './components/GoalLineCanvas'
 import { ShotDot, OUTCOME_COLORS } from './components/ShotDot'
 import { TeamPicker } from './components/TeamPicker'
+import { TournamentPicker, type TournamentOption } from './components/TournamentPicker'
 import { GROUND_Y, CROSSBAR_Y } from './lib/canvas'
-import type { Shot } from './lib/types'
-import rawShots from './data/wwc-2023/shots.json'
-import rawMeta from './data/wwc-2023/meta.json'
+import type { Shot, Match, Team } from './lib/types'
 
-const shots = rawShots as Shot[]
-const teams = rawMeta.teams
+// ── Tournament catalog (mirrors public/data/index.json) ───────────────────
+const TOURNAMENTS: TournamentOption[] = [
+  { id: 'wwc-2023', name: "Women's World Cup", season: '2023' },
+  { id: 'wc-2022',  name: "Men's World Cup",   season: '2022' },
+  { id: 'wc-2018',  name: "Men's World Cup",   season: '2018' },
+  { id: 'euro-2024',name: 'UEFA Euro',         season: '2024' },
+  { id: 'euro-2020',name: 'UEFA Euro',         season: '2020' },
+]
 
-// Dot radius scales subtly with xG so higher-quality chances read slightly larger.
+// ── Tournament data shape ─────────────────────────────────────────────────
+interface TournamentData {
+  teams: Team[]
+  matches: Match[]
+  shots: Shot[]
+}
+
+// ── Coordinate helpers ────────────────────────────────────────────────────
 function dotRadius(xg: number): number {
   return 0.55 + Math.sqrt(xg) * 0.45
 }
 
-// Map shot height (0=ground, 1=crossbar, >1=over bar) to SVG y coordinate.
-// Shots with no height data fall back to a jittered ground position.
 function dotY(shot: Shot): number {
   if (shot.height !== null) {
     return GROUND_Y - shot.height * (GROUND_Y - CROSSBAR_Y)
@@ -28,22 +38,54 @@ function dotY(shot: Shot): number {
   return GROUND_Y - 0.5 - ((Math.abs(h) % 100) / 99) * 1.5
 }
 
+// ── App ───────────────────────────────────────────────────────────────────
 export default function App() {
-  const [active, setActive] = useState<Shot | null>(null)
-  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null)
+  // ── Shared filter state ──────────────────────────────────────────────
+  const [tournamentId, setTournamentId] = useState('wwc-2023')
+  const [teamId, setTeamId] = useState<number | null>(null)
+  // playerId and matchId are parked — null until Sprint 2 wires them up
+  const [, setPlayerId] = useState<number | null>(null)
+  const [, setMatchId] = useState<number | null>(null)
 
-  const filteredShots = useMemo(
-    () => (selectedTeamId ? shots.filter((s) => s.team_id === selectedTeamId) : shots),
-    [selectedTeamId]
-  )
+  // ── Tournament data (lazy-loaded) ────────────────────────────────────
+  const [data, setData] = useState<TournamentData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [active, setActive] = useState<Shot | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setData(null)
+    setActive(null)
+    setTeamId(null)
+    setPlayerId(null)
+    setMatchId(null)
+
+    const base = `/data/${tournamentId}`
+    Promise.all([
+      fetch(`${base}/meta.json`).then(r => r.json()),
+      fetch(`${base}/shots.json`).then(r => r.json()),
+    ]).then(([meta, shots]) => {
+      setData({ teams: meta.teams, matches: meta.matches, shots })
+      setLoading(false)
+    }).catch(err => {
+      console.error('Failed to load tournament data', err)
+      setLoading(false)
+    })
+  }, [tournamentId])
+
+  // ── Filtered shots ───────────────────────────────────────────────────
+  const filteredShots = useMemo(() => {
+    if (!data) return []
+    return teamId ? data.shots.filter(s => s.team_id === teamId) : data.shots
+  }, [data, teamId])
 
   const plottable = useMemo(
-    () => filteredShots.filter((s) => s.reached_goal_line),
+    () => filteredShots.filter(s => s.reached_goal_line),
     [filteredShots]
   )
 
   const blockedCount = useMemo(
-    () => filteredShots.filter((s) => s.outcome === 'blocked').length,
+    () => filteredShots.filter(s => s.outcome === 'blocked').length,
     [filteredShots]
   )
 
@@ -54,36 +96,42 @@ export default function App() {
       </header>
 
       <div className="controls">
+        <TournamentPicker
+          tournaments={TOURNAMENTS}
+          value={tournamentId}
+          onChange={setTournamentId}
+        />
         <TeamPicker
-          teams={teams}
-          value={selectedTeamId}
-          onChange={(id) => { setSelectedTeamId(id); setActive(null) }}
+          teams={data?.teams ?? []}
+          value={teamId}
+          onChange={(id) => { setTeamId(id); setActive(null) }}
         />
       </div>
 
       <div className="canvas-wrapper">
-        <GoalLineCanvas>
-          {plottable.map((shot) => (
-            <ShotDot
-              key={shot.id}
-              shot={shot}
-              y={dotY(shot)}
-              radius={dotRadius(shot.xg)}
-              isActive={active?.id === shot.id}
-              onActivate={setActive}
-              onDeactivate={() => setActive(null)}
-            />
-          ))}
-        </GoalLineCanvas>
+        {loading ? (
+          <div className="canvas-loading">Loading…</div>
+        ) : (
+          <GoalLineCanvas>
+            {plottable.map((shot) => (
+              <ShotDot
+                key={shot.id}
+                shot={shot}
+                y={dotY(shot)}
+                radius={dotRadius(shot.xg)}
+                isActive={active?.id === shot.id}
+                onActivate={setActive}
+                onDeactivate={() => setActive(null)}
+              />
+            ))}
+          </GoalLineCanvas>
+        )}
       </div>
 
       <div className="details-bar">
         {active ? (
           <div className="details-active">
-            <span
-              className="details-dot"
-              style={{ background: OUTCOME_COLORS[active.outcome] }}
-            />
+            <span className="details-dot" style={{ background: OUTCOME_COLORS[active.outcome] }} />
             <span className="details-name">{active.player_name}</span>
             <span className="details-sep">·</span>
             <span className="details-outcome">{active.outcome}</span>
@@ -98,6 +146,7 @@ export default function App() {
           </span>
         )}
       </div>
+
       <footer className="attribution">
         Data: <a href="https://statsbomb.com/what-we-do/hub/free-data/" target="_blank" rel="noreferrer">StatsBomb</a>
       </footer>

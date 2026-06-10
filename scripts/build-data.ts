@@ -3,8 +3,15 @@ import { join } from 'path'
 
 // ── StatsBomb constants ────────────────────────────────────────────────────
 const SB_BASE = 'https://raw.githubusercontent.com/statsbomb/open-data/master/data'
-const COMPETITION_ID = 72   // Women's World Cup
-const SEASON_ID = 107       // 2023
+
+// All five tournaments in the catalog
+const TOURNAMENTS = [
+  { id: 'wwc-2023', name: "Women's World Cup", season: '2023', competition_id: 72,  season_id: 107 },
+  { id: 'wc-2022',  name: "Men's World Cup",   season: '2022', competition_id: 43,  season_id: 106 },
+  { id: 'wc-2018',  name: "Men's World Cup",   season: '2018', competition_id: 43,  season_id: 3   },
+  { id: 'euro-2024',name: 'UEFA Euro',         season: '2024', competition_id: 55,  season_id: 282 },
+  { id: 'euro-2020',name: 'UEFA Euro',         season: '2020', competition_id: 55,  season_id: 43  },
+]
 
 // StatsBomb pitch: 120×80 yards. Goal line is the 80-yard short end.
 const PITCH_WIDTH = 80
@@ -149,11 +156,13 @@ function buildShootout(kicks: any[], homeTeamId: number, awayTeamId: number, hom
   return { home_kicks: homeKicks, away_kicks: awayKicks, home_pens: homePens, away_pens: awayPens, winner }
 }
 
-// ── Main pipeline ──────────────────────────────────────────────────────────
-async function main() {
+// ── Per-tournament pipeline ────────────────────────────────────────────────
+async function processTournament(tournament: typeof TOURNAMENTS[number]) {
+  const { id, name, season, competition_id, season_id } = tournament
+  console.log(`\n── ${name} ${season} (${id}) ──`)
   console.log('Fetching match list...')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const matchList = await fetchJson<any[]>(`${SB_BASE}/matches/${COMPETITION_ID}/${SEASON_ID}.json`)
+  const matchList = await fetchJson<any[]>(`${SB_BASE}/matches/${competition_id}/${season_id}.json`)
   console.log(`Found ${matchList.length} matches`)
 
   // Build team→country map from match list
@@ -259,41 +268,37 @@ async function main() {
   console.log(`Penalty shootout matches: ${penMatches.length} —`, penMatches.map(m => `${m.home_team_name} vs ${m.away_team_name}`))
 
   // ── Write output files ─────────────────────────────────────────────────
-  const outDir = join(process.cwd(), 'src/data/wwc-2023')
+  const outDir = join(process.cwd(), 'public/data', id)
   mkdirSync(outDir, { recursive: true })
 
-  const meta: TournamentMeta = {
-    competition_id: COMPETITION_ID,
-    season_id: SEASON_ID,
-    name: "Women's World Cup",
-    season: '2023',
-    teams,
-    matches,
-  }
-
-  writeFileSync(join(outDir, 'meta.json'), JSON.stringify(meta, null, 2))
+  const meta: TournamentMeta = { competition_id, season_id, name, season, teams, matches }
+  writeFileSync(join(outDir, 'meta.json'), JSON.stringify(meta))
   console.log(`Wrote meta.json (${teams.length} teams, ${matches.length} matches)`)
 
-  writeFileSync(join(outDir, 'shots.json'), JSON.stringify(shots, null, 2))
+  writeFileSync(join(outDir, 'shots.json'), JSON.stringify(shots))
   console.log(`Wrote shots.json (${shots.length} shots)`)
 
-  // Country map: { team_id → country_name }
   const countries = Object.fromEntries(countryMap.entries())
-  writeFileSync(join(outDir, 'countries.json'), JSON.stringify(countries, null, 2))
+  writeFileSync(join(outDir, 'countries.json'), JSON.stringify(countries))
   console.log(`Wrote countries.json (${countryMap.size} entries)`)
+}
 
-  // Top-level tournament index (unchanged)
-  const index = [
-    { id: 'wwc-2023', name: "Women's World Cup", season: '2023', competition_id: 72, season_id: 107 },
-    { id: 'wc-2022', name: "Men's World Cup", season: '2022', competition_id: 43, season_id: 106 },
-    { id: 'wc-2018', name: "Men's World Cup", season: '2018', competition_id: 43, season_id: 3 },
-    { id: 'euro-2024', name: 'UEFA Euro', season: '2024', competition_id: 55, season_id: 282 },
-    { id: 'euro-2020', name: 'UEFA Euro', season: '2020', competition_id: 55, season_id: 43 },
-  ]
-  writeFileSync(join(process.cwd(), 'src/data/index.json'), JSON.stringify(index, null, 2))
-  console.log('Wrote index.json')
+// ── Main: loop all tournaments ─────────────────────────────────────────────
+async function main() {
+  for (const tournament of TOURNAMENTS) {
+    try {
+      await processTournament(tournament)
+    } catch (err) {
+      console.error(`\nFailed: ${tournament.id}`, err)
+      console.error('Skipping — flag to PM before including this tournament.')
+    }
+  }
 
-  console.log('\nDone.')
+  // Top-level index written once
+  const indexPath = join(process.cwd(), 'public/data/index.json')
+  writeFileSync(indexPath, JSON.stringify(TOURNAMENTS))
+  console.log('\nWrote public/data/index.json')
+  console.log('\nAll done.')
 }
 
 main().catch((err) => {
