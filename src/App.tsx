@@ -4,6 +4,9 @@ import { ShotDot } from './components/ShotDot'
 import { ShotCard } from './components/ShotCard'
 import { FilterBar } from './components/FilterBar'
 import { StatsBar } from './components/StatsBar'
+import { MatchCards } from './components/MatchCards'
+import { MatchHeader } from './components/MatchHeader'
+import { ShootoutStrip } from './components/ShootoutStrip'
 import { type TournamentOption } from './components/TournamentPicker'
 import { GROUND_Y, CROSSBAR_Y } from './lib/canvas'
 import type { Shot, Match, Team } from './lib/types'
@@ -102,11 +105,13 @@ export default function App() {
     return map
   }, [data])
 
-  // Match + opponent for the selected shot
+  // Active match: from the match filter if set, otherwise from the selected shot
   const selectedMatch = useMemo(() => {
-    if (!selected || !data) return null
-    return data.matches.find(m => m.match_id === selected.match_id) ?? null
-  }, [selected, data])
+    if (!data) return null
+    const id = matchId ?? selected?.match_id ?? null
+    if (!id) return null
+    return data.matches.find(m => m.match_id === id) ?? null
+  }, [matchId, selected, data])
 
   const opponent = useMemo(() => {
     if (!selected || !selectedMatch) return { name: '', country: '' }
@@ -196,6 +201,10 @@ export default function App() {
         noLocation={noLocationCount}
       />
 
+      {selectedMatch && (
+        <MatchHeader match={selectedMatch} teamCountryMap={teamCountryMap} />
+      )}
+
       <div className="canvas-wrapper">
         {loading ? (
           <div className="canvas-loading">Loading…</div>
@@ -217,6 +226,10 @@ export default function App() {
           </GoalLineCanvas>
         )}
       </div>
+
+      {selectedMatch?.shootout && (
+        <ShootoutStrip match={selectedMatch} teamCountryMap={teamCountryMap} />
+      )}
 
       {selected && (
         <ShotCard
@@ -244,6 +257,20 @@ export default function App() {
         <div className="details-bar">
           <span className="details-prompt">Tap a shot to see details</span>
         </div>
+      )}
+
+      {teamId && (
+        <MatchCards
+          matches={data?.matches.filter(m => m.home_team_id === teamId || m.away_team_id === teamId) ?? []}
+          teamId={teamId}
+          selectedMatchId={matchId}
+          teamCountryMap={teamCountryMap}
+          onSelectMatch={(id) => {
+            setMatchId(id)
+            setPlayerId(null)
+            setSelected(null)
+          }}
+        />
       )}
 
       <footer className="attribution">
