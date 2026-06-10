@@ -31,6 +31,8 @@ function dotY(shot: Shot): number {
   return GROUND_Y - shot.height! * (GROUND_Y - CROSSBAR_Y)
 }
 
+const DRAW_ORDER: Record<string, number> = { missed: 0, saved: 1, goal: 2 }
+
 export default function App() {
   const [tournamentId, setTournamentId] = useState('wwc-2023')
   const [teamId, setTeamId]     = useState<number | null>(null)
@@ -76,6 +78,11 @@ export default function App() {
   const plottable = useMemo(
     () => filteredShots.filter(s => s.reached_goal_line && s.lineX !== null && s.height !== null),
     [filteredShots]
+  )
+
+  const sortedPlottable = useMemo(
+    () => [...plottable].sort((a, b) => (DRAW_ORDER[a.outcome] ?? 0) - (DRAW_ORDER[b.outcome] ?? 0)),
+    [plottable]
   )
 
   const blockedCount = useMemo(
@@ -217,7 +224,7 @@ export default function App() {
           <div className="canvas-loading">Loading…</div>
         ) : (
           <GoalLineCanvas>
-            {plottable.map((shot) => (
+            {sortedPlottable.map((shot) => (
               <ShotDot
                 key={shot.id}
                 shot={shot}

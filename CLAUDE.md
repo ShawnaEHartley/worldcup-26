@@ -13,8 +13,12 @@ tournaments from StatsBomb free open data. See `SPEC.md`.
 - **Plan before building.** One ticket per plan; wait for approval; don't chain tickets.
 - **Product questions bounce to the PM.** Behavior/scope decisions are the PM's; implementation
   (libraries, layout, naming) is yours.
-- **Honor "tune against real data"** (`SPEC.md` §5.4: palette, height-in-wide-view, horizontal extent,
-  near-miss feel) as open Ticket-4 calls — don't lock silently.
+- **Report spec-affecting changes.** If a ticket changes product behavior, a definition, a label, a
+  count rule, or anything else recorded in `SPEC.md`, **call it out explicitly at the end of the
+  ticket** ("SPEC impact: …") so the PM can reflect it back into `SPEC.md`. Don't let the build and
+  the spec drift silently — the spec is the shared source of truth across all three teams.
+- The §5.4 visual-tuning items (palette, height rendering, horizontal extent, near-miss feel) are now
+  **locked** (decided against real data in T12); treat them as settled, not open.
 
 ## Tier-0 guardrails (non-negotiable)
 - **No backend. No database. No runtime fetching from StatsBomb.**

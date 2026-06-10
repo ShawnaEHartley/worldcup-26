@@ -11,6 +11,11 @@
 ---
 
 ## 1. One-liner
+
+**Product name:** **Where'd It Go?**
+**Tagline / description:** *A shot-placement visual for World Cup and Euro tournaments through the years.*
+(Repo/folder stays `worldcup-2026`; deployed URL stays `worldcup.shawna.dev` — neither needs to match the product name.)
+
 An interactive viz that puts a fan in the shooter's shoes — looking at the **whole goal line, corner
 to corner** — and plots where every shot ended up. A team's **finishing signature** reads in seconds,
 and any shot can be clicked to learn more and jump to that player or match.
@@ -62,8 +67,8 @@ unplottable counts, broken down by outcome, so the label is chosen from real dat
   the full 90/120-minute match is always included. Shootouts are instead surfaced in **match view**
   (§10), where they're relevant. Nothing is erased.
 
-### 5.3 Outcome encoding (defaults — tunable against real data in build)
-Goal → **green** (fixed). Saved and missed get distinct legible treatments, chosen once shots render.
+### 5.3 Outcome encoding (locked — see §5.4)
+Goal → **green**; saved → **amber** (`#fbbf24`); missed → **slate** (`#64748b`).
 
 ### 5.4 Visual tuning — decisions locked against real data (T12)
 - **Saved/missed palette** — confirmed: saved = amber (`#fbbf24`), missed = slate (`#64748b`). Clear and correct.
