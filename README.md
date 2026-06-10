@@ -25,97 +25,111 @@ the repo so the app build is fully offline.
 
 ### `src/data/index.json`
 
-Top-level list of all tournaments. Shape:
+Top-level list of all tournaments:
 
 ```json
-[
-  {
-    "id": "wwc-2023",
-    "name": "Women's World Cup",
-    "season": "2023",
-    "competition_id": 72,
-    "season_id": 107
-  }
-]
+[{ "id": "wwc-2023", "name": "Women's World Cup", "season": "2023", "competition_id": 72, "season_id": 107 }]
 ```
+
+### `src/data/{tournament-id}/countries.json`
+
+`{ team_id → country_name }` map for flag rendering. Built from match metadata.
 
 ### `src/data/{tournament-id}/meta.json`
 
-Teams and matches for one tournament.
+Teams and matches for one tournament. Each match:
 
 ```json
 {
-  "competition_id": 72,
-  "season_id": 107,
-  "name": "Women's World Cup",
-  "season": "2023",
-  "teams": [
-    { "team_id": 2391, "team_name": "Morocco Women's" }
-  ],
-  "matches": [
-    {
-      "match_id": 3893834,
-      "match_date": "2023-08-03",
-      "home_team_id": 2391,
-      "home_team_name": "Morocco Women's",
-      "away_team_id": 16802,
-      "away_team_name": "Colombia Women's",
-      "home_score": 1,
-      "away_score": 0
-    }
-  ]
+  "match_id": 3902968,
+  "date": "2023-08-12",
+  "home_team_id": 1205, "home_team_name": "Australia Women's",
+  "away_team_id": 861,  "away_team_name": "France Women's",
+  "home_score": 0, "away_score": 0,
+  "stage": "Quarter-finals", "stage_label": "Quarter-finals",
+  "result_type": "penalties",
+  "shootout": {
+    "home_kicks": [{ "player": "Caitlin Foord", "scored": true }, "..."],
+    "away_kicks": [{ "player": "Selma Bacha",   "scored": false }, "..."],
+    "home_pens": 7, "away_pens": 6,
+    "winner": "Australia Women's"
+  }
 }
 ```
 
+**`result_type`** — `normal` | `extra_time` | `penalties`. Derived from StatsBomb event
+periods (period 3/4 = extra time; period 5 = penalty shootout).
+
+**`shootout`** — present only when `result_type === 'penalties'`. Kicks are in chronological
+order within each team's row. `scored: true` = goal; `scored: false` = missed or saved.
+
 ### `src/data/{tournament-id}/shots.json`
 
-All shots for the tournament. One record per shot:
+All shots for the tournament. **Shootout kicks are excluded** (period 5); in-game penalties
+are included with `is_penalty: true`. One record per shot:
 
 ```json
 {
   "id": "uuid",
-  "player_id": 31629,
-  "player_name": "Anissa Lahmari",
+  "player_id": 402661,
+  "player_name": "Ibtissam Jraïdi",
   "team_id": 2391,
   "team_name": "Morocco Women's",
+  "team_country": "Morocco",
   "match_id": 3893834,
-  "minute": 48,
-  "outcome": "goal",
+  "minute": 0,
+  "outcome": "saved",
   "reached_goal_line": true,
-  "lineX": 0.525,
-  "height": 0.451,
-  "xg": 0.706
+  "lineX": 0.445,
+  "height": 0.533,
+  "xg": 0.0116,
+  "is_penalty": false,
+  "shot_type": "Open Play",
+  "body_part": "Right Foot",
+  "play_pattern": "Regular Play",
+  "first_time": false,
+  "under_pressure": false,
+  "assisted_by": "Ghizlane Chebbak"
 }
 ```
 
 #### Field notes
 
-**`player_id`** — StatsBomb's stable player id. Consistent across tournaments; this is
-the canonical identity that enables cross-tournament player comparison (parked feature).
+**`player_id`** — StatsBomb's stable player id, consistent across tournaments. The canonical
+identity that enables the parked cross-tournament player comparison feature.
 
 **`outcome`** — Normalized from StatsBomb's vocabulary:
 
 | Normalized | StatsBomb source outcomes | Plotted? |
 |---|---|---|
-| `goal` | `Goal` | Yes |
-| `saved` | `Saved`, `Saved Off Target`, `Saved to Post` | Yes |
-| `missed` | `Post`, `Off T`, `Wayward` | Yes — positioned by how wide |
+| `goal` | `Goal` | Yes — center band |
+| `saved` | `Saved`, `Saved Off Target`, `Saved to Post` | Yes — center band |
+| `missed` | `Post`, `Off T`, `Wayward` | Yes — by how wide |
 | `blocked` | `Blocked` | No — count shown beside view |
 
-**`reached_goal_line`** — `false` only for `blocked` shots. `lineX` and `height` are
-`null` when false.
+**`reached_goal_line`** — `false` only for `blocked`. `lineX` and `height` are `null` when false.
 
-**`lineX`** — Horizontal position along the goal line. `0` = left corner flag, `1` = right
-corner flag. The goal posts sit at approximately `0.45` (left) and `0.55` (right).
+**`lineX`** — `0` = left corner flag, `1` = right corner flag. Posts at ~0.45 (left) and ~0.55 (right).
+Derived: `lineX = y / 80` from `shot.end_location[1]` on StatsBomb's 120×80-yard pitch.
 
-Derived as `lineX = y / 80` from StatsBomb's `shot.end_location [x, y, z]`, where `y`
-is the cross-pitch coordinate on StatsBomb's 120×80-yard pitch.
+**`height`** — `0` = ground, `1` = crossbar, `>1` = over the bar. `null` when no z data or blocked.
+Derived: `height = z / 2.44`. Not the primary v1 axis — retained for the parked zoom-to-goal view.
 
-**`height`** — `0` = ground, `1` = crossbar, `>1` = over the bar. `null` if the shot had
-no z coordinate (some `missed` shots) or was blocked.
+**`is_penalty`** — `true` for in-game penalties (`shot.type.name === 'Penalty'`). These are kept
+in the shot set and flagged in the UI. Shootout kicks are excluded entirely.
 
-Derived as `height = z / 2.44` (crossbar = 2.44m in StatsBomb's coordinate system).
-Not the organizing axis in the v1 wide view — retained for the parked zoom-to-goal view.
+**`shot_type`** — StatsBomb `shot.type.name`: `Open Play`, `Penalty`, `Free Kick`, etc.
+
+**`body_part`** — `Right Foot`, `Left Foot`, `Head`, etc.
+
+**`play_pattern`** — `Regular Play`, `From Corner`, `From Free Kick`, etc.
+
+**`first_time`** — `true` if shot was struck first-time. Omitted in source when false.
+
+**`under_pressure`** — `true` if shooter was under pressure from a defender. Omitted in source when false.
+
+**`assisted_by`** — name of the player who played the key pass, or `null` if unassisted.
+Resolved by looking up `shot.key_pass_id` in the match event list.
 
 ## Attribution
 
