@@ -26,17 +26,24 @@ body {
   letter-spacing: 0.01em;
 }
 
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
 .controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 0.75rem;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .team-picker {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .team-picker-label {
@@ -59,6 +66,42 @@ body {
 }
 
 .team-picker-select:focus {
+  outline: 2px solid #388bfd;
+  outline-offset: 1px;
+}
+
+/* ── Clearable select ─────────────────────────────────────────── */
+.clearable-select {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.clearable-select-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.clear-btn {
+  background: none;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #6e7681;
+  cursor: pointer;
+  font-size: 0.75rem;
+  line-height: 1;
+  padding: 0.3rem 0.45rem;
+  transition: color 0.1s, border-color 0.1s;
+  flex-shrink: 0;
+}
+
+.clear-btn:hover {
+  color: #e6edf3;
+  border-color: #6e7681;
+}
+
+.clear-btn:focus {
   outline: 2px solid #388bfd;
   outline-offset: 1px;
 }

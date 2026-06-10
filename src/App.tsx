@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { GoalLineCanvas } from './components/GoalLineCanvas'
 import { ShotDot, OUTCOME_COLORS } from './components/ShotDot'
-import { TeamPicker } from './components/TeamPicker'
-import { TournamentPicker, type TournamentOption } from './components/TournamentPicker'
+import { FilterBar } from './components/FilterBar'
+import { type TournamentOption } from './components/TournamentPicker'
 import { GROUND_Y, CROSSBAR_Y } from './lib/canvas'
 import type { Shot, Match, Team } from './lib/types'
 
@@ -43,9 +43,8 @@ export default function App() {
   // ── Shared filter state ──────────────────────────────────────────────
   const [tournamentId, setTournamentId] = useState('wwc-2023')
   const [teamId, setTeamId] = useState<number | null>(null)
-  // playerId and matchId are parked — null until Sprint 2 wires them up
-  const [, setPlayerId] = useState<number | null>(null)
-  const [, setMatchId] = useState<number | null>(null)
+  const [playerId, setPlayerId] = useState<number | null>(null)
+  const [matchId, setMatchId] = useState<number | null>(null)
 
   // ── Tournament data (lazy-loaded) ────────────────────────────────────
   const [data, setData] = useState<TournamentData | null>(null)
@@ -76,11 +75,15 @@ export default function App() {
   // ── Filtered shots ───────────────────────────────────────────────────
   const filteredShots = useMemo(() => {
     if (!data) return []
-    return teamId ? data.shots.filter(s => s.team_id === teamId) : data.shots
-  }, [data, teamId])
+    let shots = data.shots
+    if (teamId)   shots = shots.filter(s => s.team_id   === teamId)
+    if (playerId) shots = shots.filter(s => s.player_id === playerId)
+    if (matchId)  shots = shots.filter(s => s.match_id  === matchId)
+    return shots
+  }, [data, teamId, playerId, matchId])
 
   const plottable = useMemo(
-    () => filteredShots.filter(s => s.reached_goal_line),
+    () => filteredShots.filter(s => s.reached_goal_line && s.lineX !== null && s.height !== null),
     [filteredShots]
   )
 
@@ -89,24 +92,39 @@ export default function App() {
     [filteredShots]
   )
 
+  const noLocationCount = useMemo(
+    () => filteredShots.filter(s => s.reached_goal_line && (s.lineX === null || s.height === null)).length,
+    [filteredShots]
+  )
+
+  // Clear player + match when team changes
+  function handleTeamChange(id: number | null) {
+    setTeamId(id)
+    setPlayerId(null)
+    setMatchId(null)
+    setActive(null)
+  }
+
   return (
     <main className="app">
       <header className="app-header">
         <h1>World Cup Shot Explorer</h1>
       </header>
 
-      <div className="controls">
-        <TournamentPicker
-          tournaments={TOURNAMENTS}
-          value={tournamentId}
-          onChange={setTournamentId}
-        />
-        <TeamPicker
-          teams={data?.teams ?? []}
-          value={teamId}
-          onChange={(id) => { setTeamId(id); setActive(null) }}
-        />
-      </div>
+      <FilterBar
+        tournaments={TOURNAMENTS}
+        tournamentId={tournamentId}
+        onTournamentChange={setTournamentId}
+        teams={data?.teams ?? []}
+        teamId={teamId}
+        onTeamChange={handleTeamChange}
+        playerId={playerId}
+        onPlayerChange={setPlayerId}
+        matchId={matchId}
+        onMatchChange={setMatchId}
+        shots={data?.shots ?? []}
+        matches={data?.matches ?? []}
+      />
 
       <div className="canvas-wrapper">
         {loading ? (
@@ -142,7 +160,7 @@ export default function App() {
           </div>
         ) : (
           <span className="details-prompt">
-            Hover a shot to see details &nbsp;·&nbsp; {blockedCount} blocked (not shown)
+            Hover a shot to see details &nbsp;·&nbsp; {blockedCount} blocked (not shown) &nbsp;·&nbsp; {noLocationCount} missed — location not provided (not shown)
           </span>
         )}
       </div>
