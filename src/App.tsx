@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { GoalLineCanvas } from './components/GoalLineCanvas'
 import { ShotDot, OUTCOME_COLORS } from './components/ShotDot'
 import { FilterBar } from './components/FilterBar'
+import { StatsBar } from './components/StatsBar'
 import { type TournamentOption } from './components/TournamentPicker'
 import { GROUND_Y, CROSSBAR_Y } from './lib/canvas'
 import type { Shot, Match, Team } from './lib/types'
@@ -97,6 +98,13 @@ export default function App() {
     [filteredShots]
   )
 
+  const stats = useMemo(() => {
+    const goals   = filteredShots.filter(s => s.outcome === 'goal').length
+    const onGoal  = filteredShots.filter(s => s.outcome === 'goal' || s.outcome === 'saved').length
+    const matches = new Set(filteredShots.map(s => s.match_id)).size
+    return { shots: filteredShots.length, onGoal, goals, matches }
+  }, [filteredShots])
+
   // Clear player + match when team changes
   function handleTeamChange(id: number | null) {
     setTeamId(id)
@@ -124,6 +132,15 @@ export default function App() {
         onMatchChange={setMatchId}
         shots={data?.shots ?? []}
         matches={data?.matches ?? []}
+      />
+
+      <StatsBar
+        shots={stats.shots}
+        onGoal={stats.onGoal}
+        goals={stats.goals}
+        matches={stats.matches}
+        blocked={blockedCount}
+        noLocation={noLocationCount}
       />
 
       <div className="canvas-wrapper">
@@ -159,9 +176,7 @@ export default function App() {
             <span className="details-xg" title="chance quality">{active.xg.toFixed(2)}</span>
           </div>
         ) : (
-          <span className="details-prompt">
-            Hover a shot to see details &nbsp;·&nbsp; {blockedCount} blocked (not shown) &nbsp;·&nbsp; {noLocationCount} missed — location not provided (not shown)
-          </span>
+          <span className="details-prompt">Hover a shot to see details</span>
         )}
       </div>
 

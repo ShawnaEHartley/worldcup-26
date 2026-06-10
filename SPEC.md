@@ -42,6 +42,18 @@ flags at the edges. **Placement:** each shot is a dot by **where it crossed the 
 | Missed  | nobody — wide/over | **plotted** (by how wide, toward corners) |
 | Blocked | a defender, in the field | **counted** beside the view (no goal-line position) |
 
+### 5.1a Plottable vs counted — the honest coordinate rule
+A shot is **plotted only if it has BOTH a real `lineX` AND a real `height`.** StatsBomb does not record
+a precise end-location for every shot (many off-target shots have null coordinates). **Never substitute
+or fake a missing coordinate** — a faked position makes misses appear to sit inside the goal, which is
+dishonest and misreads the data. Any shot missing either coordinate is **unplottable** and becomes a
+**count**, not a dot. So there are now (at least) two count buckets beside the view: **Blocked**, and
+**unplottable shots** (label short-form "No location"; full phrase "[outcome] — location not recorded"
+in tooltip). Because unplottable shots are overwhelmingly misses, "No location" reads correctly to a
+fan; if the data shows non-miss outcomes (goals/saves) also lack coordinates, surface them by their
+true outcome rather than mislabeling them as missed. (Diagnostic at build time: report plottable vs.
+unplottable counts, broken down by outcome, so the label is chosen from real data.)
+
 ### 5.2 Penalties & shootouts
 - **In-game penalties** (awarded during play): **kept** in the view, with a **"Penalty" flag** (§9).
 - **Shootout kicks** (the post-120' tiebreaker): **not** plotted on the goal-line map and **not** in
@@ -62,9 +74,26 @@ Goal → **green** (fixed). Saved and missed get distinct legible treatments, ch
 - Near-miss "feel."
 
 ## 6. Summary stats bar (top of the view)
-For the current selection: **Shots taken** · **On goal** (`outcome in (goal, saved)` only — a *missed*
-shot crossed the line but is NOT on goal; don't use `reached_goal_line`) · **Goals** · **Matches**
-(distinct matches). Totals reflect the **same exclusions as the plot** (shootout kicks out).
+A row of stat chips between the filter bar and the canvas, always reflecting the active filters
+(computed from the filtered shots — no new data). Two tiers:
+
+**Primary (full brightness):**
+- **Shots** — *all* attempts in the current selection (every outcome, including blocked and
+  unplottable — the truest "how many attempts" read).
+- **On goal** — `outcome in (goal, saved)` only. (A *missed* shot crossed the line but is NOT on
+  goal; do not use `reached_goal_line`.)
+- **Goals** — `goal` only. Rendered in **green** (same green as the goal dot).
+- **Matches** — distinct matches in the selection.
+
+**Secondary (dimmed, "not shown on the map" context):**
+- **Blocked** — count of blocked shots. Hover/tap → tooltip explaining a block is stopped by a
+  defender before reaching goal.
+- **No location** — count of unplottable shots (missing coordinates). Hover/tap → tooltip:
+  "location not recorded in the data." (Per §5.1a.)
+
+Keeping Blocked and No-location *here* (rather than only beside the graphic) means they stay visible
+even when a shot is selected and the detail card is showing. All chips reflect the same exclusions as
+the plot (shootout kicks out).
 
 ## 7. Filters & navigation — one shared, composable state
 Single filter state driven by two interchangeable controls: the filter bar and graphic clicks.
@@ -103,6 +132,14 @@ When the selection is narrowed to a **single match**:
   order**, aligned column-wise, **green = scored, red = missed/saved**, with the pen tally and the
   winner. This is where shootout kicks live (they're excluded from the goal-line map per §5.2).
 
+## 10a. Onboarding suggestions (guide an uninformed user)
+A new user who picks a team faces empty filters with no idea where to start. To guide them, surface
+a couple of **one-tap suggestions** drawn from data already computed — e.g. "⭐ Top scorer: [player]"
+and "🔥 Most goals: vs [opponent]". Tapping a suggestion simply **sets the filters** (reuses the
+shared filter state, §7) — it's a shortcut, not a new view. Reuses existing data (sort shots by
+goals per player / per match); no new pipeline. Build after the core view + filters exist
+(late Sprint 2 / Sprint 3), not in the tracer bullet.
+
 ## 11. Content catalog (v1)
 Five tournaments confirmed in StatsBomb free data: 2018 Men's WC, 2022 Men's WC, 2023 Women's WC
 (richest), Euro 2020, Euro 2024. No others; no live 2026. If one is missing/incomplete at pipeline
@@ -122,6 +159,10 @@ Live 2026 tab (own spec); zoomed goal-only/placement view (parked); cross-era pl
 2. **Live 2026 tab** — isolated behind a tab boundary.
 3. **"Players of the tournament"** — auto-select top finishers.
 4. **Cross-era player comparison** — enabled by player-centric model + stable `player_id`.
+5. **Clickable tournament bracket** — a knockout-tree view where tapping a team filters to them. Its
+   own visualization (own data: the knockout structure; own layout) — group stages are tables, not
+   brackets, and structures vary by tournament, so it's real scope, not a tweak. Post-MVP. *Seam:*
+   the per-match `stage` field (§15) already captures enough to reconstruct the bracket later cheaply.
 
 ## 15. The data contract
 Ours to define; engineering maps from StatsBomb (confirm fields against real data). Normalized coords
@@ -170,8 +211,12 @@ meta instead. `player_id` is the stable cross-tournament identity.
 - [ ] Select any of five tournaments; select any team.
 - [ ] Corner-to-corner view of all that team's plottable shots; goals green/center; saved/missed
       distinct; blocked as a count; in-game penalties flagged.
+- [ ] A shot is plotted only with **both** real `lineX` and `height`; unplottable shots are never
+      drawn with faked coordinates — they appear as a "No location" count.
 - [ ] Shootout kicks excluded from the map and tournament/team totals.
-- [ ] Summary stats bar (shots / on-goal=goals+saves / goals / matches), consistent with the dots.
+- [ ] Summary stats bar: primary chips (Shots=all attempts / On goal=goals+saves / Goals in green /
+      Matches) + dimmed secondary chips (Blocked, No location) with explanatory tooltips; all
+      consistent with the plot and reflecting active filters.
 - [ ] Filter bar shares one state with graphic clicks, both ways; Player & Match composable/clearable.
 - [ ] Tap a dot → highlight + detail card below (no hover); single-select; card has outcome,
       player+flag, opponent+flag, minute, stage, plain-language xG, assist, situation flags, two doorways.
