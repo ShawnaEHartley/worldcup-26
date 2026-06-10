@@ -120,3 +120,16 @@ body {
 .details-xg {
   color: #8b949e;
 }
+
+/* ── Attribution ──────────────────────────────────────────── */
+.attribution {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  color: #6e7681;
+}
+
+.attribution a {
+  color: #6e7681;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

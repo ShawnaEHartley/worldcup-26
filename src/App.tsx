@@ -98,6 +98,9 @@ export default function App() {
           </span>
         )}
       </div>
+      <footer className="attribution">
+        Data: <a href="https://statsbomb.com/what-we-do/hub/free-data/" target="_blank" rel="noreferrer">StatsBomb</a>
+      </footer>
     </main>
   )
 }
