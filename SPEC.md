@@ -115,6 +115,10 @@ replaces). Selected dot highlights; details appear in a **card below the graphic
   and contextual flags (Penalty, First-time, Under pressure).
 - **Two doorways:** "See all of [player]'s shots" → sets Player; "Open the [opponent] match" → sets
   Match. (Reuses existing navigation via shared state.)
+- **Team swap button:** a third action in the card — "Switch to [opponent]'s shots" — sets Team to
+  the opponent and clears Player/Match, keeping you in the same tournament. Lets a user who just
+  clicked a shot from one side instantly flip to see the other team's shots without navigating back
+  through the filter bar.
 
 Keep the card crisp — "everything useful," trim if heavy.
 

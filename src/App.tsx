@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { GoalLineCanvas } from './components/GoalLineCanvas'
-import { ShotDot, OUTCOME_COLORS } from './components/ShotDot'
+import { ShotDot } from './components/ShotDot'
+import { ShotCard } from './components/ShotCard'
 import { FilterBar } from './components/FilterBar'
 import { StatsBar } from './components/StatsBar'
 import { type TournamentOption } from './components/TournamentPicker'
 import { GROUND_Y, CROSSBAR_Y } from './lib/canvas'
 import type { Shot, Match, Team } from './lib/types'
 
-// ── Tournament catalog (mirrors public/data/index.json) ───────────────────
 const TOURNAMENTS: TournamentOption[] = [
   { id: 'wwc-2023', name: "Women's World Cup", season: '2023' },
   { id: 'wc-2022',  name: "Men's World Cup",   season: '2022' },
@@ -16,46 +16,36 @@ const TOURNAMENTS: TournamentOption[] = [
   { id: 'euro-2020',name: 'UEFA Euro',         season: '2020' },
 ]
 
-// ── Tournament data shape ─────────────────────────────────────────────────
 interface TournamentData {
   teams: Team[]
   matches: Match[]
   shots: Shot[]
 }
 
-// ── Coordinate helpers ────────────────────────────────────────────────────
 function dotRadius(xg: number): number {
   return 0.55 + Math.sqrt(xg) * 0.45
 }
 
 function dotY(shot: Shot): number {
-  if (shot.height !== null) {
-    return GROUND_Y - shot.height * (GROUND_Y - CROSSBAR_Y)
-  }
-  let h = 0
-  for (let i = 0; i < Math.min(shot.id.length, 12); i++) {
-    h = (Math.imul(31, h) + shot.id.charCodeAt(i)) | 0
-  }
-  return GROUND_Y - 0.5 - ((Math.abs(h) % 100) / 99) * 1.5
+  return GROUND_Y - shot.height! * (GROUND_Y - CROSSBAR_Y)
 }
 
-// ── App ───────────────────────────────────────────────────────────────────
 export default function App() {
-  // ── Shared filter state ──────────────────────────────────────────────
   const [tournamentId, setTournamentId] = useState('wwc-2023')
-  const [teamId, setTeamId] = useState<number | null>(null)
+  const [teamId, setTeamId]     = useState<number | null>(null)
   const [playerId, setPlayerId] = useState<number | null>(null)
-  const [matchId, setMatchId] = useState<number | null>(null)
+  const [matchId, setMatchId]   = useState<number | null>(null)
 
-  // ── Tournament data (lazy-loaded) ────────────────────────────────────
-  const [data, setData] = useState<TournamentData | null>(null)
+  const [data, setData]       = useState<TournamentData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [active, setActive] = useState<Shot | null>(null)
+  const [hovered, setHovered] = useState<Shot | null>(null)
+  const [selected, setSelected] = useState<Shot | null>(null)
 
   useEffect(() => {
     setLoading(true)
     setData(null)
-    setActive(null)
+    setHovered(null)
+    setSelected(null)
     setTeamId(null)
     setPlayerId(null)
     setMatchId(null)
@@ -73,7 +63,6 @@ export default function App() {
     })
   }, [tournamentId])
 
-  // ── Filtered shots ───────────────────────────────────────────────────
   const filteredShots = useMemo(() => {
     if (!data) return []
     let shots = data.shots
@@ -99,18 +88,80 @@ export default function App() {
   )
 
   const stats = useMemo(() => {
-    const goals   = filteredShots.filter(s => s.outcome === 'goal').length
-    const onGoal  = filteredShots.filter(s => s.outcome === 'goal' || s.outcome === 'saved').length
+    const goals  = filteredShots.filter(s => s.outcome === 'goal').length
+    const onGoal = filteredShots.filter(s => s.outcome === 'goal' || s.outcome === 'saved').length
     const matches = new Set(filteredShots.map(s => s.match_id)).size
     return { shots: filteredShots.length, onGoal, goals, matches }
   }, [filteredShots])
 
-  // Clear player + match when team changes
+  // Build a team → country lookup from all shots (not just filtered)
+  const teamCountryMap = useMemo(() => {
+    if (!data) return new Map<number, string>()
+    const map = new Map<number, string>()
+    for (const s of data.shots) map.set(s.team_id, s.team_country)
+    return map
+  }, [data])
+
+  // Match + opponent for the selected shot
+  const selectedMatch = useMemo(() => {
+    if (!selected || !data) return null
+    return data.matches.find(m => m.match_id === selected.match_id) ?? null
+  }, [selected, data])
+
+  const opponent = useMemo(() => {
+    if (!selected || !selectedMatch) return { name: '', country: '' }
+    const isHome = selectedMatch.home_team_id === selected.team_id
+    return {
+      name:    isHome ? selectedMatch.away_team_name : selectedMatch.home_team_name,
+      country: isHome
+        ? (teamCountryMap.get(selectedMatch.away_team_id) ?? '')
+        : (teamCountryMap.get(selectedMatch.home_team_id) ?? ''),
+    }
+  }, [selected, selectedMatch, teamCountryMap])
+
+  // Swap target: opponent derived from selected shot (preferred) or from match filter
+  const swapTarget = useMemo(() => {
+    if (selected && selectedMatch) {
+      const isHome = selectedMatch.home_team_id === selected.team_id
+      return {
+        teamId: isHome ? selectedMatch.away_team_id : selectedMatch.home_team_id,
+        name:   isHome ? selectedMatch.away_team_name : selectedMatch.home_team_name,
+      }
+    }
+    if (matchId && teamId && data) {
+      const m = data.matches.find(m => m.match_id === matchId)
+      if (m) {
+        const isHome = m.home_team_id === teamId
+        return {
+          teamId: isHome ? m.away_team_id : m.home_team_id,
+          name:   isHome ? m.away_team_name : m.home_team_name,
+        }
+      }
+    }
+    return null
+  }, [selected, selectedMatch, matchId, teamId, data])
+
   function handleTeamChange(id: number | null) {
     setTeamId(id)
     setPlayerId(null)
     setMatchId(null)
-    setActive(null)
+    setSelected(null)
+  }
+
+  function handleSwapTeam(newTeamId: number) {
+    setTeamId(newTeamId)
+    setPlayerId(null)
+    setSelected(null)
+    // matchId kept: if in a match context, stay in it but see the other team
+  }
+
+  function handleSelect(shot: Shot) {
+    if (selected?.id === shot.id) {
+      setSelected(null)
+    } else {
+      setSelected(shot)
+      setTeamId(shot.team_id)
+    }
   }
 
   return (
@@ -132,6 +183,8 @@ export default function App() {
         onMatchChange={setMatchId}
         shots={data?.shots ?? []}
         matches={data?.matches ?? []}
+        swapTarget={swapTarget}
+        onSwapTeam={handleSwapTeam}
       />
 
       <StatsBar
@@ -154,31 +207,44 @@ export default function App() {
                 shot={shot}
                 y={dotY(shot)}
                 radius={dotRadius(shot.xg)}
-                isActive={active?.id === shot.id}
-                onActivate={setActive}
-                onDeactivate={() => setActive(null)}
+                isHovered={hovered?.id === shot.id}
+                isSelected={selected?.id === shot.id}
+                onHover={setHovered}
+                onHoverEnd={() => setHovered(null)}
+                onSelect={handleSelect}
               />
             ))}
           </GoalLineCanvas>
         )}
       </div>
 
-      <div className="details-bar">
-        {active ? (
-          <div className="details-active">
-            <span className="details-dot" style={{ background: OUTCOME_COLORS[active.outcome] }} />
-            <span className="details-name">{active.player_name}</span>
-            <span className="details-sep">·</span>
-            <span className="details-outcome">{active.outcome}</span>
-            <span className="details-sep">·</span>
-            <span className="details-minute">{active.minute}&prime;</span>
-            <span className="details-sep">·</span>
-            <span className="details-xg" title="chance quality">{active.xg.toFixed(2)}</span>
-          </div>
-        ) : (
-          <span className="details-prompt">Hover a shot to see details</span>
-        )}
-      </div>
+      {selected && (
+        <ShotCard
+          shot={selected}
+          match={selectedMatch}
+          opponentName={opponent.name}
+          opponentCountry={opponent.country}
+          onSelectPlayer={() => {
+            setTeamId(selected.team_id)
+            setPlayerId(selected.player_id)
+            setMatchId(null)
+            setSelected(null)
+          }}
+          onSelectMatch={() => {
+            setTeamId(selected.team_id)
+            setMatchId(selected.match_id)
+            setPlayerId(null)
+            setSelected(null)
+          }}
+          onClose={() => setSelected(null)}
+        />
+      )}
+
+      {!selected && (
+        <div className="details-bar">
+          <span className="details-prompt">Tap a shot to see details</span>
+        </div>
+      )}
 
       <footer className="attribution">
         Data: <a href="https://statsbomb.com/what-we-do/hub/free-data/" target="_blank" rel="noreferrer">StatsBomb</a>

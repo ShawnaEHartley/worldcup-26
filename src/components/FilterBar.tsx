@@ -21,6 +21,9 @@ interface FilterBarProps {
   // Data needed to populate player + match options
   shots: Shot[]
   matches: Match[]
+  // Swap
+  swapTarget: { teamId: number; name: string } | null
+  onSwapTeam: (teamId: number) => void
 }
 
 export function FilterBar({
@@ -29,8 +32,8 @@ export function FilterBar({
   playerId, onPlayerChange,
   matchId, onMatchChange,
   shots, matches,
+  swapTarget, onSwapTeam,
 }: FilterBarProps) {
-  // Players in the current team selection, sorted by name
   const players = useMemo(() => {
     if (!teamId) return []
     const seen = new Map<number, string>()
@@ -44,7 +47,6 @@ export function FilterBar({
       .sort((a, b) => a.name.localeCompare(b.name))
   }, [shots, teamId])
 
-  // Matches relevant to the current team selection, sorted by date
   const teamMatches = useMemo(() => {
     if (!teamId) return []
     return matches
@@ -78,6 +80,16 @@ export function FilterBar({
             <option key={t.team_id} value={t.team_id}>{t.team_name}</option>
           ))}
         </ClearableSelect>
+
+        {swapTarget && (
+          <button
+            className="swap-btn"
+            onClick={() => onSwapTeam(swapTarget.teamId)}
+            title={`Switch to ${swapTarget.name}'s shots`}
+            aria-label={`Switch to ${swapTarget.name}'s shots`}
+            type="button"
+          >⇄</button>
+        )}
       </div>
 
       {teamId && (
