@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { flag } from '../lib/flags'
 import { OUTCOME_COLORS } from './ShotDot'
 import type { Shot, Match } from '../lib/types'
@@ -51,6 +52,9 @@ export function ShotCard({
   shot, match, opponentName, opponentCountry,
   onSelectPlayer, onSelectMatch, onClose,
 }: ShotCardProps) {
+  const closeRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => { closeRef.current?.focus() }, [])
+
   const outcomeColor = OUTCOME_COLORS[shot.outcome] ?? '#94a3b8'
   const outcomeLabel = shot.outcome.charAt(0).toUpperCase() + shot.outcome.slice(1)
 
@@ -67,7 +71,7 @@ export function ShotCard({
     <div className="shot-card">
       <div className="shot-card-banner" style={{ color: outcomeColor }}>
         <span>{outcomeLabel}</span>
-        <button className="shot-card-close" onClick={onClose} aria-label="Close shot detail" type="button">✕</button>
+        <button ref={closeRef} className="shot-card-close" onClick={onClose} aria-label="Close shot detail" type="button">✕</button>
       </div>
 
       <div className="shot-card-body">

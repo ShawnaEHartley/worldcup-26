@@ -40,6 +40,7 @@ export function MatchCards({ matches, teamId, selectedMatchId, teamCountryMap, o
             key={m.match_id}
             className={`match-card${isSelected ? ' match-card--selected' : ''}`}
             onClick={() => onSelectMatch(m.match_id)}
+            aria-pressed={isSelected}
             type="button"
           >
             <span className="match-card-opponent">

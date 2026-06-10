@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
+import { OUTCOME_COLORS } from './components/ShotDot'
+import { flag } from './lib/flags'
 import { GoalLineCanvas } from './components/GoalLineCanvas'
 import { ShotDot } from './components/ShotDot'
 import { ShotCard } from './components/ShotCard'
@@ -120,6 +122,14 @@ export default function App() {
     }
   }, [selected, selectedMatch, teamCountryMap])
 
+  // Hover preview: match + opponent for the hovered dot
+  const hoveredOpponent = useMemo(() => {
+    if (!hovered || !data) return ''
+    const m = data.matches.find(m => m.match_id === hovered.match_id)
+    if (!m) return ''
+    return m.home_team_id === hovered.team_id ? m.away_team_name : m.home_team_name
+  }, [hovered, data])
+
   // Swap target: opponent derived from selected shot (preferred) or from match filter
   const swapTarget = useMemo(() => {
     if (selected && selectedMatch) {
@@ -168,7 +178,8 @@ export default function App() {
   return (
     <main className="app">
       <header className="app-header">
-        <h1>World Cup Shot Explorer</h1>
+        <h1>Where'd It Go?</h1>
+        <p className="app-tagline">A shot-placement visual for World Cup and Euro tournaments through the years.</p>
       </header>
 
       <FilterBar
@@ -250,7 +261,17 @@ export default function App() {
 
       {!selected && (
         <div className="details-bar">
-          <span className="details-prompt">Tap a shot to see details</span>
+          {hovered ? (
+            <div className="details-active details-preview">
+              <span className="details-dot" style={{ background: OUTCOME_COLORS[hovered.outcome] }} />
+              <span className="details-name">{flag(hovered.team_country)} {hovered.player_name}</span>
+              {hoveredOpponent && <><span className="details-sep">vs</span><span className="details-meta">{hoveredOpponent}</span></>}
+              <span className="details-sep">·</span>
+              <span className="details-minute">{hovered.minute}&prime;</span>
+            </div>
+          ) : (
+            <span className="details-prompt">Tap a shot to see details</span>
+          )}
         </div>
       )}
 

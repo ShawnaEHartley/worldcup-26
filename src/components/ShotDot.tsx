@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Shot } from '../lib/types'
 import { toSVGX } from '../lib/canvas'
 
@@ -20,10 +21,12 @@ interface ShotDotProps {
 }
 
 export function ShotDot({ shot, y, isHovered, isSelected, onHover, onHoverEnd, onSelect }: ShotDotProps) {
+  const [isFocused, setIsFocused] = useState(false)
   const x     = toSVGX(shot.lineX!)
   const color = OUTCOME_COLORS[shot.outcome] ?? '#94a3b8'
   const r       = isHovered ? DOT_R * 1.3 : DOT_R
-  const opacity = isSelected || isHovered ? 1 : 0.72
+  const opacity = isSelected || isHovered || isFocused ? 1 : 0.72
+  const showRing = isSelected || isFocused
 
   return (
     <circle
@@ -32,8 +35,8 @@ export function ShotDot({ shot, y, isHovered, isSelected, onHover, onHoverEnd, o
       r={r}
       fill={color}
       opacity={opacity}
-      stroke={isSelected ? 'white' : 'none'}
-      strokeWidth={isSelected ? 0.25 : 0}
+      stroke={showRing ? 'white' : 'none'}
+      strokeWidth={showRing ? 0.25 : 0}
       style={{ cursor: 'pointer', transition: 'r 0.1s, opacity 0.1s', outline: 'none' }}
       onMouseEnter={() => onHover(shot)}
       onMouseLeave={onHoverEnd}
@@ -41,8 +44,8 @@ export function ShotDot({ shot, y, isHovered, isSelected, onHover, onHoverEnd, o
       tabIndex={0}
       role="button"
       aria-label={`${shot.outcome} by ${shot.player_name}, minute ${shot.minute}`}
-      onFocus={() => onHover(shot)}
-      onBlur={onHoverEnd}
+      onFocus={() => { setIsFocused(true); onHover(shot) }}
+      onBlur={() => { setIsFocused(false); onHoverEnd() }}
     />
   )
 }
