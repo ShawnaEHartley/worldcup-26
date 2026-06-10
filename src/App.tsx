@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { GoalLineCanvas } from './components/GoalLineCanvas'
 import { ShotDot, OUTCOME_COLORS } from './components/ShotDot'
+import { TeamPicker } from './components/TeamPicker'
 import { GROUND_Y, CROSSBAR_Y } from './lib/canvas'
 import type { Shot } from './lib/types'
 import rawShots from './data/wwc-2023/shots.json'
+import rawMeta from './data/wwc-2023/meta.json'
 
 const shots = rawShots as Shot[]
+const teams = rawMeta.teams
 
 // Dot radius scales subtly with xG so higher-quality chances read slightly larger.
 function dotRadius(xg: number): number {
@@ -18,7 +21,6 @@ function dotY(shot: Shot): number {
   if (shot.height !== null) {
     return GROUND_Y - shot.height * (GROUND_Y - CROSSBAR_Y)
   }
-  // Fallback: deterministic jitter for the rare shots without height data
   let h = 0
   for (let i = 0; i < Math.min(shot.id.length, 12); i++) {
     h = (Math.imul(31, h) + shot.id.charCodeAt(i)) | 0
@@ -26,17 +28,38 @@ function dotY(shot: Shot): number {
   return GROUND_Y - 0.5 - ((Math.abs(h) % 100) / 99) * 1.5
 }
 
-const plottable = shots.filter((s) => s.reached_goal_line)
-const blockedCount = shots.filter((s) => s.outcome === 'blocked').length
-
 export default function App() {
   const [active, setActive] = useState<Shot | null>(null)
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null)
+
+  const filteredShots = useMemo(
+    () => (selectedTeamId ? shots.filter((s) => s.team_id === selectedTeamId) : shots),
+    [selectedTeamId]
+  )
+
+  const plottable = useMemo(
+    () => filteredShots.filter((s) => s.reached_goal_line),
+    [filteredShots]
+  )
+
+  const blockedCount = useMemo(
+    () => filteredShots.filter((s) => s.outcome === 'blocked').length,
+    [filteredShots]
+  )
 
   return (
     <main className="app">
       <header className="app-header">
         <h1>World Cup Shot Explorer</h1>
       </header>
+
+      <div className="controls">
+        <TeamPicker
+          teams={teams}
+          value={selectedTeamId}
+          onChange={(id) => { setSelectedTeamId(id); setActive(null) }}
+        />
+      </div>
 
       <div className="canvas-wrapper">
         <GoalLineCanvas>

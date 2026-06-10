@@ -1,200 +1,190 @@
-# SPEC.md — Goal-Frame Shot Explorer
+# SPEC.md — Goal-Line Shot Explorer
 
-> Product requirements for `worldcup-2026`. This is the source of truth for **what** we're
-> building and **why**. The companion `CLAUDE.md` covers **how** (stack, conventions, guardrails).
-> When an implementation choice would change scope or product behavior, it stops being an
-> engineering decision and comes back to the PM — see "Working agreement" in `CLAUDE.md`.
+> Product requirements for `worldcup-2026`. Source of truth for **what** we're building and **why**.
+> `CLAUDE.md` covers **how**. Product/scope decisions come back to the PM, not the engineer.
+
+> **REVISION — consolidated + final.** Folds in the full discovery/mockup sessions: corner-to-corner
+> canvas, summary stats bar, synced/composable filters, rich shot-detail card with flags,
+> tap-to-select (no hover), shot-as-doorway navigation, match cards, penalty handling, and the
+> **match-view result header + in-match shootout strip**. Replace any older copy.
 
 ---
 
 ## 1. One-liner
-
-An interactive viz that lets a fan look **at the goal** and see, for any team in a finalized
-tournament, **where every shot ended up** — goals tucked in the corners, saves on the frame,
-near-misses just outside — so a team's *finishing signature* reads in seconds.
+An interactive viz that puts a fan in the shooter's shoes — looking at the **whole goal line, corner
+to corner** — and plots where every shot ended up. A team's **finishing signature** reads in seconds,
+and any shot can be clicked to learn more and jump to that player or match.
 
 ## 2. Who it's for
+The **fan** — casual to curious. No analytics vocabulary required (xG appears only in plain language).
+Audience is hiring managers; we serve them by serving the fan well — tight, polished, reliable.
 
-The **fan** — casual to curious. No analytics vocabulary required. Someone should be able to
-use this without knowing what "xG" means. (xG is used under the hood and may appear as a subtle
-visual weight, but it is never the headline and never gating.)
+## 3. The core thing (10-second takeaway)
+A team's **finishing signature** as an accuracy story: shots tight around the goal read "clinical";
+sprayed toward the corners reads "wild." Instant, no-jargon.
 
-The *audience* evaluating the work is hiring managers looking at a portfolio. We serve them by
-serving the fan well: a tight, opinionated, reliable tool is the strongest signal of product
-judgment. We do **not** serve them by adding features.
+## 4. Look & feel
+Friendly, characterful, clean — **not** clinical-grey like FBref/Understat, **not** childish. "Polished
+and warm," like a well-made app: rounded, soft, a little playful, always legible. Cute *and* tight.
 
-## 3. The core thing (the 10-second takeaway)
+## 5. The hero view — the goal line, corner to corner
+The only spatial view in v1. (A zoomed goal-only "placement" view is parked — §14.)
 
-Within ten seconds of landing on a team, the user grasps that team's **finishing signature**:
-a cluster of green in the top corners reads "clinical"; a spray of dots high and wide reads
-"wasteful." That instant, emotional read is the product. Everything else supports it.
+**Camera:** the shooter's perspective on the entire short end of the pitch — goal centered, corner
+flags at the edges. **Placement:** each shot is a dot by **where it crossed the goal line, left-to-right**
+(`lineX`) — the accuracy axis.
 
-## 4. The hero view — the goal-frame
+### 5.1 Plotted vs counted
+| Outcome | Ended by | In the view |
+|---------|----------|-------------|
+| Goal    | went in  | **plotted** (net, center) |
+| Saved   | the keeper | **plotted** (at goal, center) |
+| Missed  | nobody — wide/over | **plotted** (by how wide, toward corners) |
+| Blocked | a defender, in the field | **counted** beside the view (no goal-line position) |
 
-This is the only view in the MVP. There is **no** top-down "where they shot from" pitch map.
+### 5.2 Penalties & shootouts
+- **In-game penalties** (awarded during play): **kept** in the view, with a **"Penalty" flag** (§9).
+- **Shootout kicks** (the post-120' tiebreaker): **not** plotted on the goal-line map and **not** in
+  the summary totals at tournament/team level — they're all identical central high-xG kicks and would
+  distort a finishing signature. **Important:** this excludes only the shootout *kicks themselves* —
+  the full 90/120-minute match is always included. Shootouts are instead surfaced in **match view**
+  (§10), where they're relevant. Nothing is erased.
 
-**The camera:** we look *at* the goal — net, posts, crossbar — head-on. Each shot is a dot
-placed where the ball **ended up** relative to the goal, not where it was struck.
+### 5.3 Outcome encoding (defaults — tunable against real data in build)
+Goal → **green** (fixed). Saved and missed get distinct legible treatments, chosen once shots render.
 
-**What earns a dot** (a shot that *reached the goal mouth*):
-- **Goal** — crossed the line. Dot inside the frame, in the corner/spot where it went in.
-- **Saved** — reached the frame, keeper stopped it. Dot on the frame where it was met.
-- **Near-miss** — rang off the post/bar, or missed by a whisker. Dot just outside the frame.
+### 5.4 Deliberately deferred to "tune against real rendered data" (build-time)
+- Saved/missed **palette**.
+- Whether the wide view renders **height** at all + compression (over-bar shots reach ~2× crossbar;
+  §15). First render: **horizontal-only**.
+- Exact **horizontal extent** — true corner-to-corner makes the goal ~10% of width with central
+  clustering; a tighter frame may read better. Validate against real spread.
+- Near-miss "feel."
 
-**What does NOT earn a dot** (a shot that never reached the goal mouth):
-- **Blocked** — a *defender* (not the keeper) stopped it out in the field; it never reached
-  the goal, so it has no goalmouth position and cannot honestly sit on this view.
-- **Wild / wayward** — sailed well over or wide; outside the frame's neighborhood.
+## 6. Summary stats bar (top of the view)
+For the current selection: **Shots taken** · **On goal** (`outcome in (goal, saved)` only — a *missed*
+shot crossed the line but is NOT on goal; don't use `reached_goal_line`) · **Goals** · **Matches**
+(distinct matches). Totals reflect the **same exclusions as the plot** (shootout kicks out).
 
-These are not discarded — they are surfaced as a **count** beside the view
-(e.g. "12 blocked · 9 off-target"), so the information is present without polluting the picture.
+## 7. Filters & navigation — one shared, composable state
+Single filter state driven by two interchangeable controls: the filter bar and graphic clicks.
+**Bar:** `[Tournament] → [Team] → [Player] [Match]`. Tournament + Team are the required cascade;
+**Player and Match are optional, composable narrowers** (usable together = "that player in that match"),
+each clearable (✕). **Two-way sync:** clicking a shot's player sets Player; clicking its match sets
+Match; changing a dropdown redraws. Same state, two doors.
 
-**Interaction:** hovering (or tapping) a dot reveals the shooter — at minimum player name;
-ideally also minute and match. The dot is the atom; the hover is the payoff.
+## 8. Selecting a shot — tap to a detail card (no hover)
+**Tap/click, not hover** (works on touch; nothing floats over the graphic). **Single-select** (each tap
+replaces). Selected dot highlights; details appear in a **card below the graphic**:
+- **Outcome** banner (color-coded).
+- **Player** + country flag; **opponent** + country flag.
+- **Minute**, **stage**, **match result**.
+- **Chance quality** — xG in **plain language** ("0.34 xG — about a 1-in-3 chance"). Never lead with
+  the bare term.
+- **Set up by** — assisting player, if any.
+- **"How it happened" flags/badges** — body part, situation (open play / from corner / free kick),
+  and contextual flags (Penalty, First-time, Under pressure).
+- **Two doorways:** "See all of [player]'s shots" → sets Player; "Open the [opponent] match" → sets
+  Match. (Reuses existing navigation via shared state.)
 
-### 4.1 In-view cutoff (default — tunable in build)
-A shot earns a dot if its end position is **on the frame or a near-miss**. The precise near-miss
-boundary (how far outside the posts/bar still counts) is a **default we set and then tune against
-real rendered data** in the build — it does not block the spec. Start tight (on-target + clear
-near-misses), widen only if the picture feels too sparse.
+Keep the card crisp — "everything useful," trim if heavy.
 
-### 4.2 Outcome encoding (default — tunable in build)
-- **Goal → green.** This one is fixed.
-- **Saved** and **off-target/near-miss** get distinct, legible treatments (color and/or shape)
-  chosen once we see real shots rendered. Do not finalize the palette from imagination.
-- Optional: **xG as dot size** (bigger = higher-quality chance). Subtle, never labeled with the
-  term "xG" in the primary UI. Treat as a nice-to-have, not a blocker.
+## 9. Match cards (the matches in the current view)
+Below the card, the matches in the current selection appear as cards with **opponent, stage, result**
+in fan phrasing ("vs Germany · Group Stage · Match 2 · W 2–1"). Tapping drills into that match.
 
-## 5. Content catalog (v1)
+## 10. Match view — result header + shootout strip
+When the selection is narrowed to a **single match**:
+- **Result header** reads like a quick search result: score and winner, with knockout nuance —
+  normal time ("England 2–1 Colombia · Quarter-final"), after extra time ("… a.e.t."), or on penalties
+  ("Sweden 0–0 USA · Sweden win 5–4 on penalties · Round of 16").
+- **Shootout strip** (only if the match went to penalties): a small display **below the graphic**,
+  **grouped by team** (two rows, one per team) — broadcast style. Each row shows the team's kicks **in
+  order**, aligned column-wise, **green = scored, red = missed/saved**, with the pen tally and the
+  winner. This is where shootout kicks live (they're excluded from the goal-line map per §5.2).
 
-Exactly the five tournaments confirmed present in StatsBomb's free open data with full shot data.
-**No other tournaments in v1**, and explicitly **no live 2026** (see §8).
+## 11. Content catalog (v1)
+Five tournaments confirmed in StatsBomb free data: 2018 Men's WC, 2022 Men's WC, 2023 Women's WC
+(richest), Euro 2020, Euro 2024. No others; no live 2026. If one is missing/incomplete at pipeline
+time, drop it and flag to PM.
 
-1. **2018 Men's World Cup**
-2. **2022 Men's World Cup**
-3. **2023 Women's World Cup** — richest dataset; includes StatsBomb 360 freeze-frames
-4. **UEFA Euro 2020**
-5. **UEFA Euro 2024**
+## 12. Data & attribution
+StatsBomb free open data (static JSON). **Visible "Data: StatsBomb"** credit (non-negotiable).
+Non-commercial. **No runtime fetching** — build-time transform into committed JSON (§15).
 
-> The exact set is **research-confirmed** as of June 2026. If a tournament turns out to be
-> missing or incomplete when the pipeline runs (ticket 2), drop it and flag to PM — do not
-> substitute a different one without sign-off. Tournaments before 2018 (2010/2014 WC, Euro
-> 2012/2016) are **not** in the free set and are out of scope.
+## 13. Out of scope (v1)
+Live 2026 tab (own spec); zoomed goal-only/placement view (parked); cross-era player comparison
+(parked); tournaments outside the five; accounts/saved-state/server-side anything.
 
-## 6. Information architecture / navigation
+## 14. Parked features (don't preclude them now)
+1. **Zoom-to-goal (placement) view** — toggle into a goal-only frame where **height** is the primary
+   axis. Needs `height` retained (§15). Home for the over-the-bar story.
+2. **Live 2026 tab** — isolated behind a tab boundary.
+3. **"Players of the tournament"** — auto-select top finishers.
+4. **Cross-era player comparison** — enabled by player-centric model + stable `player_id`.
 
-```
-[Tournament]  ->  [Team]  ->  goal-frame for the WHOLE tournament
-                    |
-                    +--> [Match]    (drill into one game's shots)
-                    +--> [Player]   (shots by one player, within the selected team)
-```
+## 15. The data contract
+Ours to define; engineering maps from StatsBomb (confirm fields against real data). Normalized coords
+keep raw pitch units out of the renderer.
+- `lineX`: 0 = left corner, 1 = right corner (posts ~0.45–0.55). `height`: 0 = ground, 1 = crossbar,
+  >1 = over (retained for parked zoom; not v1 axis). `reached_goal_line`: false for blocked → counted.
 
-- **Tournament picker** (top level): choose one of the five.
-- **Team picker:** choose a team within that tournament. This is the default landing state —
-  goal-frame shows **all of that team's shots across the whole tournament**.
-- **Match drill-down:** narrow the goal-frame to a single match.
-- **Player view:** within a selected team, pick a player to see only their shots.
-  Player is a lens *inside* a team in v1 (you pick team first, then player).
-
-## 7. Acceptance criteria (MVP)
-
-The MVP is "done" when all of the following are true:
-
-- [ ] User can select any of the five tournaments.
-- [ ] User can select any team in that tournament and see a goal-frame of **all** that team's
-      qualifying shots for the whole tournament.
-- [ ] Goals render green, inside the frame, at their end position.
-- [ ] Saved shots and near-misses render on/just-outside the frame with distinct treatments.
-- [ ] Blocked and wild shots are **not** plotted, but their counts are shown beside the view.
-- [ ] Hovering/tapping any dot reveals at least the shooter's name.
-- [ ] User can drill from team -> a single match and the goal-frame updates accordingly.
-- [ ] User can select a player within a team and see only that player's shots.
-- [ ] The view is legible on desktop and usable on mobile (responsive; polish can follow).
-- [ ] A visible **"Data: StatsBomb"** attribution line is present (see §10).
-- [ ] The site is a fully static deploy on Vercel with no backend and no database.
-
-## 8. Out of scope (v1) — say no on purpose
-
-- **The live 2026 tournament tab.** Different data, different fidelity, different scope —
-  it gets its **own spec** later. Research confirmed free 2026 data is goals/scores only
-  (no shot placement), so it can never be a goal-frame; do not stub it into this codebase.
-- **Top-down "where they shot from" pitch map.** A different camera. Not in v1.
-- **Cross-team / cross-tournament player comparison** (the Bellingham-vs-Schweinsteiger idea).
-  Parked — but the data model must not preclude it (see §9).
-- **Any tournament not in the five-tournament catalog.**
-- **Accounts, saving, sharing links, server-side anything.**
-
-## 9. Parked features (design the seams now, build later)
-
-These are **not** built in v1, but the architecture must not make them expensive later:
-
-1. **Live 2026 tab** — isolated behind a tab boundary; the hero must not depend on it.
-2. **"Players of the tournament"** — auto-select a tournament's top finishers as a starting view.
-3. **Cross-era player comparison** — overlay one player's finishing signature against another's,
-   across teams and tournaments (bounded to tournaments in our catalog).
-
-**Required seam for #3:** the data model is **player-centric**. Every shot is tagged to a player
-as a first-class entity with a **stable identity that is consistent across tournaments**
-(use StatsBomb's stable player id as canonical). With that in place, comparison is later just a
-query, not a rebuild. See `CLAUDE.md` "Data model".
-
-## 10. Data & attribution
-
-- **Source:** StatsBomb free open data (`statsbomb/open-data`), static JSON.
-- **Attribution is non-negotiable.** StatsBomb's free terms require visible credit. A persistent,
-  legible **"Data: StatsBomb"** line must appear in the UI (e.g. footer). This is an acceptance
-  criterion, not a nicety.
-- **Non-commercial.** This is a portfolio piece; do not present it as a commercial product.
-- **The app never fetches StatsBomb at runtime.** Data is pulled and transformed at **build time**
-  into a slim, app-ready JSON contract that is committed to the repo. See `CLAUDE.md` for the
-  pipeline and the exact data contract.
-
-## 11. The data contract (what the app consumes)
-
-This shape is **ours to define** (engineering owns the mapping *from* StatsBomb *to* this). The
-goal-frame depends on each shot's **goalmouth end-position**, which StatsBomb's shot data carries
-(end location including height). Exact field names are confirmed against real data in ticket 2.
-
-A normalized **goalmouth coordinate** is defined in our own space so the renderer never touches
-raw pitch units:
-- `gx`: horizontal position where `0` = left post, `1` = right post; `<0` / `>1` = wide of the post.
-- `gz`: height where `0` = ground, `1` = crossbar; `>1` = over the bar.
-- `reached_goalmouth: false` (blocked/wild) -> `goalmouth` is `null` and the shot is counted, not plotted.
-
-Conceptual per-shot record (illustrative; finalize names in build):
-
+**Per-shot record (illustrative):**
 ```json
 {
-  "id": "shot_uuid",
-  "player_id": "sb_player_id",
-  "player_name": "...",
-  "team_id": "sb_team_id",
-  "team_name": "...",
-  "match_id": "sb_match_id",
-  "minute": 67,
-  "outcome": "goal | saved | near_miss | blocked | wayward",
-  "reached_goalmouth": true,
-  "goalmouth": { "gx": 0.92, "gz": 0.71 },
-  "xg": 0.34
+  "id": "shot_uuid", "player_id": 402661, "player_name": "Linda Caicedo",
+  "team_id": 16802, "team_name": "Colombia Women's", "team_country": "Colombia",
+  "match_id": 3893834, "minute": 39,
+  "outcome": "goal | saved | missed | blocked",
+  "reached_goal_line": true, "lineX": 0.51, "height": 0.78, "xg": 0.34,
+  "is_penalty": false,
+  "shot_type": "Open Play | Penalty | Free Kick",
+  "body_part": "Right Foot | Left Foot | Head | Other",
+  "play_pattern": "Regular Play | From Corner | From Free Kick | ...",
+  "first_time": true, "under_pressure": true,
+  "assisted_by": "Mayra Ramírez"
 }
 ```
+Shootout kicks are **excluded from the shot set** (filter on StatsBomb period) — they live in match
+meta instead. `player_id` is the stable cross-tournament identity.
 
-`player_id` is stable across tournaments and is the canonical identity that makes the parked
-comparison feature a query later. Per-tournament files (teams, players, matches, shots) keep
-payloads small so only the selected tournament loads. Engineering decides exact file layout;
-the contract above is the seam.
+**Per-match meta (stats bar, match cards, match-view header, shootout strip, flags):**
+```json
+{
+  "match_id": 3901797,
+  "home_team": "Sweden Women's", "away_team": "United States Women's",
+  "home_score": 0, "away_score": 0,
+  "result_type": "normal | extra_time | penalties",
+  "stage": "Round of 16", "stage_label": "Round of 16", "date": "2023-08-06",
+  "shootout": {
+    "home_kicks": [{ "player": "Fridolina Rolfö", "scored": true }, "..."],
+    "away_kicks": [{ "player": "Megan Rapinoe", "scored": false }, "..."],
+    "home_pens": 5, "away_pens": 4, "winner": "Sweden Women's"
+  }
+}
+```
+`shootout` present only when `result_type == penalties`. `stage` from `competition_stage.name`. A
+`team → country` map drives flags.
 
-## 12. Phasing
+## 16. Acceptance criteria (MVP)
+- [ ] Select any of five tournaments; select any team.
+- [ ] Corner-to-corner view of all that team's plottable shots; goals green/center; saved/missed
+      distinct; blocked as a count; in-game penalties flagged.
+- [ ] Shootout kicks excluded from the map and tournament/team totals.
+- [ ] Summary stats bar (shots / on-goal=goals+saves / goals / matches), consistent with the dots.
+- [ ] Filter bar shares one state with graphic clicks, both ways; Player & Match composable/clearable.
+- [ ] Tap a dot → highlight + detail card below (no hover); single-select; card has outcome,
+      player+flag, opponent+flag, minute, stage, plain-language xG, assist, situation flags, two doorways.
+- [ ] Match cards list matches in view (opponent/stage/result); tapping drills in.
+- [ ] Match view shows a result header (normal / a.e.t. / penalties, with winner); when applicable, a
+      shootout strip grouped by team (green/red, in order, winner).
+- [ ] Visible "Data: StatsBomb" attribution. Fully static on Vercel; no backend/DB.
 
-The full MVP (sections 4-7) is the target. The path:
+## 17. Phasing
+- **Sprint 1 — tracer bullet:** scaffold+deploy, data pipeline, goal-line canvas + plotted shots +
+  basic team filter, one tournament, deployed.
+- **Sprint 2 — full interface + catalog:** five tournaments; synced composable filters; stats bar;
+  tap-to-select rich shot card + doorways; match cards; **match view (result header + shootout strip)**.
+- **Sprint 3 — polish:** palette/height/extent tuning, accessibility, mobile, custom domain.
 
-- **Sprint 1 — the tracer bullet.** One tournament, goal-frame hero, team filter, deployed to a
-  Vercel staging URL end-to-end. Proves data -> render -> deploy through every layer on real data.
-  This is the **floor**: a real, demoable thing that exists regardless of what comes after.
-- **Sprint 2 — fill the catalog + drill-downs.** All five tournaments; match drill-down; player
-  view; the blocked/wild counts; responsive pass.
-- **Sprint 3 — polish.** Palette tuning against real data, accessibility, mobile refinement,
-  point `worldcup.shawna.dev` at it.
-
-Sprint 1 ticket breakdown lives in `CLAUDE.md` so engineering builds against it directly.
+Ticket breakdown in `CLAUDE.md`.

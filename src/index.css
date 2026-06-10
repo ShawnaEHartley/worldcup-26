@@ -26,6 +26,43 @@ body {
   letter-spacing: 0.01em;
 }
 
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+  align-items: center;
+}
+
+.team-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.team-picker-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.team-picker-select {
+  background: #161b22;
+  color: #e6edf3;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  min-width: 200px;
+}
+
+.team-picker-select:focus {
+  outline: 2px solid #388bfd;
+  outline-offset: 1px;
+}
+
 .canvas-wrapper {
   width: 100%;
 }
