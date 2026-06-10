@@ -95,19 +95,6 @@ export function FilterBar({
       {teamId && (
         <div className="controls">
           <ClearableSelect
-            id="player-select"
-            label="Player"
-            value={playerId}
-            onChange={(v) => onPlayerChange(v ? Number(v) : null)}
-            onClear={() => onPlayerChange(null)}
-          >
-            <option value="">All players</option>
-            {players.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </ClearableSelect>
-
-          <ClearableSelect
             id="match-select"
             label="Match"
             value={matchId}
@@ -117,6 +104,23 @@ export function FilterBar({
             <option value="">All matches</option>
             {teamMatches.map(m => (
               <option key={m.match_id} value={m.match_id}>{matchLabel(m)}</option>
+            ))}
+          </ClearableSelect>
+        </div>
+      )}
+
+      {teamId && (
+        <div className="controls">
+          <ClearableSelect
+            id="player-select"
+            label="Player"
+            value={playerId}
+            onChange={(v) => onPlayerChange(v ? Number(v) : null)}
+            onClear={() => onPlayerChange(null)}
+          >
+            <option value="">All players</option>
+            {players.map(p => (
+              <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </ClearableSelect>
         </div>

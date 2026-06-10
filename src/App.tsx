@@ -25,10 +25,6 @@ interface TournamentData {
   shots: Shot[]
 }
 
-function dotRadius(xg: number): number {
-  return 0.55 + Math.sqrt(xg) * 0.45
-}
-
 function dotY(shot: Shot): number {
   return GROUND_Y - shot.height! * (GROUND_Y - CROSSBAR_Y)
 }
@@ -215,7 +211,6 @@ export default function App() {
                 key={shot.id}
                 shot={shot}
                 y={dotY(shot)}
-                radius={dotRadius(shot.xg)}
                 isHovered={hovered?.id === shot.id}
                 isSelected={selected?.id === shot.id}
                 onHover={setHovered}

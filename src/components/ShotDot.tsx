@@ -7,10 +7,11 @@ export const OUTCOME_COLORS: Record<string, string> = {
   missed: '#64748b',
 }
 
+const DOT_R = 0.75
+
 interface ShotDotProps {
   shot: Shot
   y: number
-  radius: number
   isHovered: boolean
   isSelected: boolean
   onHover: (shot: Shot) => void
@@ -18,13 +19,11 @@ interface ShotDotProps {
   onSelect: (shot: Shot) => void
 }
 
-export function ShotDot({ shot, y, radius, isHovered, isSelected, onHover, onHoverEnd, onSelect }: ShotDotProps) {
-  const x = toSVGX(shot.lineX!)
+export function ShotDot({ shot, y, isHovered, isSelected, onHover, onHoverEnd, onSelect }: ShotDotProps) {
+  const x     = toSVGX(shot.lineX!)
   const color = OUTCOME_COLORS[shot.outcome] ?? '#94a3b8'
-
-  const r       = isSelected ? radius * 1.6 : isHovered ? radius * 1.2 : radius
-  const opacity = isSelected ? 1 : isHovered ? 0.9 : 0.72
-  const stroke  = isSelected ? 'white' : 'none'
+  const r       = isHovered ? DOT_R * 1.3 : DOT_R
+  const opacity = isSelected || isHovered ? 1 : 0.72
 
   return (
     <circle
@@ -33,9 +32,9 @@ export function ShotDot({ shot, y, radius, isHovered, isSelected, onHover, onHov
       r={r}
       fill={color}
       opacity={opacity}
-      stroke={stroke}
-      strokeWidth={isSelected ? 0.3 : 0}
-      style={{ cursor: 'pointer', transition: 'r 0.1s, opacity 0.1s' }}
+      stroke={isSelected ? 'white' : 'none'}
+      strokeWidth={isSelected ? 0.25 : 0}
+      style={{ cursor: 'pointer', transition: 'r 0.1s, opacity 0.1s', outline: 'none' }}
       onMouseEnter={() => onHover(shot)}
       onMouseLeave={onHoverEnd}
       onClick={() => onSelect(shot)}

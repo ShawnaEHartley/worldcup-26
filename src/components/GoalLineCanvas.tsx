@@ -39,7 +39,7 @@ export function GoalLineCanvas({ children }: { children?: ReactNode }) {
       width="100%"
       role="img"
       aria-label="Goal line view, corner to corner"
-      style={{ display: 'block' }}
+      style={{ display: 'block', width: '100%', aspectRatio: '100/28' }}
     >
       <defs>
         {/* Net crosshatch: each tile draws a left edge + top edge → grid appearance */}
