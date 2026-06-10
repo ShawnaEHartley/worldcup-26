@@ -65,13 +65,11 @@ unplottable counts, broken down by outcome, so the label is chosen from real dat
 ### 5.3 Outcome encoding (defaults — tunable against real data in build)
 Goal → **green** (fixed). Saved and missed get distinct legible treatments, chosen once shots render.
 
-### 5.4 Deliberately deferred to "tune against real rendered data" (build-time)
-- Saved/missed **palette**.
-- Whether the wide view renders **height** at all + compression (over-bar shots reach ~2× crossbar;
-  §15). First render: **horizontal-only**.
-- Exact **horizontal extent** — true corner-to-corner makes the goal ~10% of width with central
-  clustering; a tighter frame may read better. Validate against real spread.
-- Near-miss "feel."
+### 5.4 Visual tuning — decisions locked against real data (T12)
+- **Saved/missed palette** — confirmed: saved = amber (`#fbbf24`), missed = slate (`#64748b`). Clear and correct.
+- **Height** — confirmed: rendering vertical position (dot Y = height above ground). Accurate before the parked zoom view (§14 #1).
+- **Horizontal extent** — confirmed: true corner-to-corner. The goal at ~10% width is correct and will be tunable in the parked zoom feature (§14 #1), not now.
+- **Near-miss feel** — confirmed: true pitch width. Wide misses plot toward the corner flags as expected.
 
 ## 6. Summary stats bar (top of the view)
 A row of stat chips between the filter bar and the canvas, always reflecting the active filters
